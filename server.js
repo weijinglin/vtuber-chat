@@ -1,8 +1,24 @@
 const express = require('express')
 const app = express()
 const http = require('http').Server(app)
-const io = require('socket.io')(http)
-const port = process.env.PORT || 3000
+const io = require('socket.io')(http,{ cors: true })
+const port = process.env.PORT || 8080
+
+//设置允许跨域访问该服务.
+app.all("*",function(req,res,next){
+    //设置允许跨域的域名，*代表允许任意域名跨域
+    res.header("Access-Control-Allow-Origin","*");
+    //允许的header类型
+    res.header("Access-Control-Allow-Headers","Origin,X-Requested-With,Accept,Content-type");
+    res.header("Access-Control-Allow-Credentials",true);
+    //跨域允许的请求方式
+    res.header("Access-Control-Allow-Methods","PUT,POST,GET,DELETE,OPTIONS");
+    res.header("Content-Type","application/json;charset=utf-8")
+    if (req.method.toLowerCase() == 'options')
+        res.sendStatus(200);  //让options尝试请求快速结束
+    else
+        next();
+});
 
 app.use(express.static(__dirname + "/public"));
 app.use('/public',express.static('public'));
@@ -15,6 +31,7 @@ app.get('/',function(req,res){
 
 io.on('connection', function (socket) {
     socket.on("NewClient", function () {
+        console.log("receice newclient!")
         if (clients < 2) {
             if (clients == 1) {
                 console.log("createPeer")
