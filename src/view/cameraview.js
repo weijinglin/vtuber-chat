@@ -1,6 +1,121 @@
-
+import socket from "../model/socket";
+import Peer from 'simple-peer'
 
 export function Cameraview(props) {
+
+    var localVideo = document.getElementById('local_video');
+    var remoteVideo = document.getElementById('remote_video');
+    var startButton = document.getElementById('startButton');
+    var callButton = document.getElementById('callButton');
+    var hangupButton = document.getElementById('hangupButton');
+    var localStream;
+    var client = {};
+    const startAction = ()=>{
+        //采集摄像头视频
+        localVideo = document.getElementById('local_video');
+        remoteVideo = document.getElementById('remote_video');
+        startButton = document.getElementById('startButton');
+        callButton = document.getElementById('callButton');
+        hangupButton = document.getElementById('hangupButton');
+        navigator.mediaDevices.getUserMedia({ video: true,audio:true })
+            .then(function(mediaStream){
+                socket.emit("NewClient");
+                localStream = mediaStream;
+                localVideo.srcObject = mediaStream;
+                localVideo.play();
+                startButton.disabled = true;
+                callButton.disabled = false;
+
+
+                //used to initialize a peer
+                function InitPeer(type) {
+                    let peer = new Peer({ initiator: (type == 'init') ? true : false, stream: mediaStream, trickle: false , config: {
+                            iceServers: [
+                                { urls: "stun:stun.l.google.com:19302"}, // 谷歌的公共服务
+                                {
+                                    urls: "turn:124.70.155.149:3478",
+                                    username: "vmeet", // 用户名
+                                    credential: "num11" // 密码
+                                }
+                            ]
+                        }})
+                    peer.on('stream', function (stream) {
+                        // CreateVideo(stream)
+                        remoteVideo.srcObject = stream;
+                        remoteVideo.play();
+                        remoteVideo.addEventListener("click",() => {
+                            if (remoteVideo.volume != 0)
+                                remoteVideo.volume = 0
+                            else
+                                remoteVideo.volume = 1
+                        })
+                    })
+                    //This isn't working in chrome; works perfectly in firefox.
+                    // peer.on('close', function () {
+                    //     document.getElementById("peerVideo").remove();
+                    //     peer.destroy()
+                    // })
+                    peer.on('data', function (data) {
+                        let decodedData = new TextDecoder('utf-8').decode(data)
+                        let peervideo = document.querySelector('#remote_video')
+                        peervideo.style.filter = decodedData
+                    })
+                    return peer
+                }
+
+                //for peer of type init
+                function MakePeer() {
+                    client.gotAnswer = false
+                    let peer = InitPeer('init')
+                    console.log("signal")
+                    peer.on('signal', function (data) {
+                        console.log("signal boom");
+                        if (!client.gotAnswer) {
+                            socket.emit('Offer', data)
+                        }
+                    })
+                    client.peer = peer
+                }
+
+                //for peer of type not init
+                function FrontAnswer(offer) {
+                    let peer = InitPeer('notInit')
+                    peer.on('signal', (data) => {
+                        socket.emit('Answer', data)
+                    })
+                    peer.signal(offer)
+                    client.peer = peer
+                }
+
+                function SignalAnswer(answer) {
+                    client.gotAnswer = true
+                    let peer = client.peer
+                    peer.signal(answer)
+                }
+
+                function SessionActive() {
+                    document.write('Session Active. Please come back later')
+                }
+
+                function RemovePeer() {
+                    if (client.peer) {
+                        client.peer.destroy();
+                        hangupButton.disabled = true;
+                        callButton.disabled = true;
+                        startButton.disabled = false;
+                    }
+                }
+
+                socket.on('BackOffer', FrontAnswer)
+                socket.on('BackAnswer', SignalAnswer)
+                socket.on('SessionActive', SessionActive)
+                socket.on('CreatePeer', MakePeer)
+                socket.on('Disconnect', RemovePeer)
+
+            }).catch(function(error){
+            console.log(JSON.stringify(error));
+        });
+    }
 
     return(
         <div className="container">
@@ -12,7 +127,7 @@ export function Cameraview(props) {
                 </div>
                 <hr/>
                     <div className="button_container">
-                        <button id="startButton">采集视频</button>
+                        <button id="startButton" onClick={startAction}>采集视频</button>
                         <button id="callButton">呼叫</button>
                         <button id="hangupButton">关闭</button>
                     </div>
