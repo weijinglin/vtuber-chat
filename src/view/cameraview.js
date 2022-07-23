@@ -39,6 +39,7 @@ export function Cameraview(props) {
                                 }
                             ]
                         }})
+                    console.log("type " + type);
                     peer.on('stream', function (stream) {
                         // CreateVideo(stream)
                         remoteVideo.srcObject = stream;
@@ -55,11 +56,12 @@ export function Cameraview(props) {
                     //     document.getElementById("peerVideo").remove();
                     //     peer.destroy()
                     // })
-                    peer.on('data', function (data) {
-                        let decodedData = new TextDecoder('utf-8').decode(data)
-                        let peervideo = document.querySelector('#remote_video')
-                        peervideo.style.filter = decodedData
-                    })
+                    // peer.on('data', function (data) {
+                    //     let decodedData = new TextDecoder('utf-8').decode(data)
+                    //     let peervideo = document.querySelector('#remote_video')
+                    //     peervideo.style.filter = decodedData
+                    // })
+                    console.log("debug")
                     return peer
                 }
 
