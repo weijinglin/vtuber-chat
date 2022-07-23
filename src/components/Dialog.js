@@ -10,20 +10,20 @@ const Dialog = (props) => {
     //     setIsModalVisible(true);
     // };
 
-    const handleOk = () => {
-        setIsModalVisible(false);
-    };
-
-    const handleCancel = () => {
-        setIsModalVisible(false);
-    };
+    // const handleOk = () => {
+    //     setIsModalVisible(false);
+    // };
+    //
+    // const handleCancel = () => {
+    //     setIsModalVisible(false);
+    // };
 
     return (
         <>
             {/*<Button type="primary" onClick={showModal}>*/}
             {/*    Open Modal*/}
             {/*</Button>*/}
-            <Modal title="Basic Modal" visible={isModalVisible} onOk={handleOk} onCancel={handleCancel}>
+            <Modal title="Basic Modal" visible={isModalVisible} onOk={props.onok} onCancel={props.oncancel}>
                 <p>Some contents...</p>
                 <p>Some contents...</p>
                 <p>Some contents...</p>

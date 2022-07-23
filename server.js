@@ -33,19 +33,38 @@ app.get('/',function(req,res){
 io.on('connection', function (socket) {
     socket.on("NewClient", function () {
         console.log("receice newclient!")
-        if (clients < 2) {
-            if (clients == 1) {
-                console.log("createPeer")
-                this.emit('CreatePeer')
-            }
+        // if (clients < 2) {
+        //     if (clients == 1) {
+        //         console.log("createPeer")
+        //         this.emit('CreatePeer')
+        //     }
+        // }
+        // else
+        //     this.emit('SessionActive')
+        // clients++;
+        if(clients == 2){
+            //向对端发起请求
+            io.to("room").broadcast("call");
         }
-        else
-            this.emit('SessionActive')
-        clients++;
+        else{
+            this.emit("failed")
+        }
     })
+    if (clients < 2) {
+        if (clients == 1) {
+            console.log("room fulled")
+            // socket.emit('CreatePeer')
+        }
+        socket.join("room");
+        clients++;
+    }
+    else
+        socket.emit('SessionActive')
+
     socket.on('Offer', SendOffer)
     socket.on('Answer', SendAnswer)
     socket.on('disconnect', Disconnect)
+    socket.on('called',Docall);
 })
 
 function Disconnect() {
@@ -54,6 +73,10 @@ function Disconnect() {
             this.broadcast.emit("Disconnect")
         clients--
     }
+}
+
+function Docall() {
+    io.to("room").broadcast("createPeer");
 }
 
 function SendOffer(offer) {
