@@ -44,7 +44,8 @@ io.on('connection', function (socket) {
         // clients++;
         if(clients == 2){
             //向对端发起请求
-            io.to("room").broadcast("call");
+            console.log("send req");
+            io.to("room").emit("call");
         }
         else{
             this.emit("failed")
@@ -76,7 +77,7 @@ function Disconnect() {
 }
 
 function Docall() {
-    io.to("room").broadcast("createPeer");
+    io.to("room").emit("createPeer");
 }
 
 function SendOffer(offer) {

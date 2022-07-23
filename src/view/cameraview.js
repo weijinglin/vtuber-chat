@@ -210,6 +210,7 @@ export function Cameraview(props) {
     }
 
     function response() {
+        console.log("response")
         setIsModalVisible(true);
     }
 
