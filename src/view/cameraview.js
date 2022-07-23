@@ -1,8 +1,13 @@
 import socket from "../model/socket";
 import Peer from 'simple-peer'
+import Dialog from "../components/Dialog";
+import {useState} from 'react';
 
 export function Cameraview(props) {
 
+    //control the visiability of Dialog
+    const [isModalVisible, setIsModalVisible] = useState(false);
+    
     var localVideo = document.getElementById('local_video');
     var remoteVideo = document.getElementById('remote_video');
     var startButton = document.getElementById('startButton');
@@ -47,12 +52,18 @@ export function Cameraview(props) {
                     //     document.getElementById("peerVideo").remove();
                     //     peer.destroy()
                     // })
+
+                    /* the next code cause some bug in the React Frame,so comment them
+
                     // peer.on('data', function (data) {
                     //     let decodedData = new TextDecoder('utf-8').decode(data)
                     //     let peervideo = document.querySelector('#remote_video')
                     //     peervideo.style.filter = decodedData
                     // })
                     console.log("debug")
+
+                    */
+
                     return peer
                 }
 
@@ -64,7 +75,7 @@ export function Cameraview(props) {
                     peer.on('signal', function (data) {
                         console.log("signal boom");
                         if (!client.gotAnswer) {
-                            socket.emit('Offer', data)
+                            socket.emit('Offer', data);
                         }
                     })
                     client.peer = peer
@@ -110,6 +121,8 @@ export function Cameraview(props) {
         });
     }
 
+
+
     return(
         <div className="container">
             <h1>单机版视频呼叫</h1>
@@ -124,8 +137,7 @@ export function Cameraview(props) {
                         <button id="callButton">呼叫</button>
                         <button id="hangupButton">关闭</button>
                     </div>
-                    {/*<script src="/socket.io/socket.io.js"></script>*/}
-                    {/*<script src="public/bundle.js"></script>*/}
+            <Dialog show={isModalVisible}></Dialog>
         </div>
     );
 }
