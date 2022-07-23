@@ -29,16 +29,7 @@ export function Cameraview(props) {
 
                 //used to initialize a peer
                 function InitPeer(type) {
-                    let peer = new Peer({ initiator: (type == 'init') ? true : false, stream: mediaStream, trickle: false , config: {
-                            iceServers: [
-                                { urls: "stun:stun.l.google.com:19302"}, // 谷歌的公共服务
-                                {
-                                    urls: "turn:124.70.155.149:3478",
-                                    username: "vmeet", // 用户名
-                                    credential: "num11" // 密码
-                                }
-                            ]
-                        }})
+                    let peer = new Peer({ initiator: (type == 'init') ? true : false, stream: mediaStream, trickle: false})
                     console.log("type " + type);
                     peer.on('stream', function (stream) {
                         // CreateVideo(stream)
