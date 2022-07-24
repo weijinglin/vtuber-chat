@@ -210,11 +210,13 @@ export function Cameraview(props) {
     }
 
     function response() {
-        console.log("response")
+        console.log("response");
+        console.log(isModalVisible);
         setIsModalVisible(true);
     }
 
     const onOk = () => {
+        console.log("ok hit");
         Response();
         socket.emit("called");
         setIsModalVisible(false);

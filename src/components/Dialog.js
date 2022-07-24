@@ -1,10 +1,10 @@
 import { Button, Modal } from 'antd';
-import React, { useState } from 'react';
+import React, {useEffect, useState} from 'react';
 import 'antd/dist/antd.css';
 
 
 const Dialog = (props) => {
-    const [isModalVisible, setIsModalVisible] = useState(props.show);
+    // const [isModalVisible, setIsModalVisible] = useState(props.show);
 
     // const showModal = () => {
     //     setIsModalVisible(true);
@@ -18,12 +18,18 @@ const Dialog = (props) => {
     //     setIsModalVisible(false);
     // };
 
+    useEffect(()=>{
+        console.log("debug");
+        console.log(props.show);
+        console.log("test");
+    },[])
+
     return (
         <>
             {/*<Button type="primary" onClick={showModal}>*/}
             {/*    Open Modal*/}
             {/*</Button>*/}
-            <Modal title="Basic Modal" visible={isModalVisible} onOk={props.onok} onCancel={props.oncancel}>
+            <Modal title="Basic Modal" visible={props.show} onOk={props.onok} onCancel={props.oncancel}>
                 <p>Some contents...</p>
                 <p>Some contents...</p>
                 <p>Some contents...</p>
