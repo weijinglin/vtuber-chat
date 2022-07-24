@@ -69,6 +69,7 @@ export function Cameraview(props) {
 
                 //for peer of type init
                 function MakePeer() {
+                    console.log("make peer");
                     client.gotAnswer = false
                     let peer = InitPeer('init')
                     console.log("signal")
@@ -130,6 +131,7 @@ export function Cameraview(props) {
         hangupButton = document.getElementById('hangupButton');
         navigator.mediaDevices.getUserMedia({ video: true,audio:true })
             .then(function(mediaStream){
+                socket.emit("called");
                 localStream = mediaStream;
                 localVideo.srcObject = mediaStream;
                 localVideo.play();
@@ -157,6 +159,7 @@ export function Cameraview(props) {
 
                 //for peer of type init
                 function MakePeer() {
+                    console.log("make peer");
                     client.gotAnswer = false
                     let peer = InitPeer('init')
                     console.log("signal")
@@ -218,7 +221,6 @@ export function Cameraview(props) {
     const onOk = () => {
         console.log("ok hit");
         Response();
-        socket.emit("called");
         setIsModalVisible(false);
     }
 
