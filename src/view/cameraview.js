@@ -132,8 +132,11 @@ export function Cameraview(props) {
 
     const hangupAction = () => {
         localStream.getTracks().forEach(track => track.stop());
+        console.log("in hangup");
+        console.log("check peer");
         if(client.peer){
-            client.peer.remove();
+            console.log("peer okk")
+            client.peer.destroy();
             hangupButton.disabled = true;
             startButton.disabled = false;
             socket.emit("hangup");

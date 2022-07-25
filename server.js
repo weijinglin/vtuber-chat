@@ -71,6 +71,7 @@ io.on('connection', function (socket) {
 })
 
 function Dohangup() {
+    console.log("hangup");
     this.broadcast.emit("hangup");
 }
 
