@@ -3,6 +3,8 @@ import Peer from 'simple-peer'
 import Dialog from "../components/Dialog";
 import {useState} from 'react';
 import RejectDialog from "../components/RejectDialog";
+import {clear} from "@testing-library/user-event/dist/clear";
+import HangupDialog from "../components/HangupDialog";
 
 export function Cameraview(props) {
 
@@ -11,10 +13,11 @@ export function Cameraview(props) {
 
     const [isReject,setIsReject] = useState(false);
 
+    const [isHangup,setIsHangup] = useState(false);
+
     var localVideo = document.getElementById('local_video');
     var remoteVideo = document.getElementById('remote_video');
     var startButton = document.getElementById('startButton');
-    var callButton = document.getElementById('callButton');
     var hangupButton = document.getElementById('hangupButton');
     var localStream;
     var client = {};
@@ -23,7 +26,6 @@ export function Cameraview(props) {
         localVideo = document.getElementById('local_video');
         remoteVideo = document.getElementById('remote_video');
         startButton = document.getElementById('startButton');
-        callButton = document.getElementById('callButton');
         hangupButton = document.getElementById('hangupButton');
         navigator.mediaDevices.getUserMedia({ video: true,audio:true })
             .then(function(mediaStream){
@@ -32,7 +34,6 @@ export function Cameraview(props) {
                 localVideo.srcObject = mediaStream;
                 localVideo.play();
                 startButton.disabled = true;
-                callButton.disabled = false;
 
 
                 //used to initialize a peer
@@ -109,9 +110,12 @@ export function Cameraview(props) {
                     if (client.peer) {
                         client.peer.destroy();
                         hangupButton.disabled = true;
-                        callButton.disabled = true;
                         startButton.disabled = false;
                     }
+                }
+                
+                function Hangup() {
+                    setIsHangup(true);
                 }
 
                 socket.on('BackOffer', FrontAnswer)
@@ -119,10 +123,21 @@ export function Cameraview(props) {
                 socket.on('SessionActive', SessionActive)
                 socket.on('CreatePeer', MakePeer)
                 socket.on('Disconnect', RemovePeer)
+                socket.on('hangup',Hangup);
 
             }).catch(function(error){
             console.log(JSON.stringify(error));
         });
+    }
+
+    const hangupAction = () => {
+        localStream.getTracks().forEach(track => track.stop());
+        if(client.peer){
+            client.peer.remove();
+            hangupButton.disabled = true;
+            startButton.disabled = false;
+            socket.emit("hangup");
+        }
     }
 
     const Response = () => {
@@ -130,7 +145,6 @@ export function Cameraview(props) {
         localVideo = document.getElementById('local_video');
         remoteVideo = document.getElementById('remote_video');
         startButton = document.getElementById('startButton');
-        callButton = document.getElementById('callButton');
         hangupButton = document.getElementById('hangupButton');
         navigator.mediaDevices.getUserMedia({ video: true,audio:true })
             .then(function(mediaStream){
@@ -139,7 +153,6 @@ export function Cameraview(props) {
                 localVideo.srcObject = mediaStream;
                 localVideo.play();
                 startButton.disabled = true;
-                callButton.disabled = false;
 
 
                 //used to initialize a peer
@@ -199,9 +212,12 @@ export function Cameraview(props) {
                     if (client.peer) {
                         client.peer.destroy();
                         hangupButton.disabled = true;
-                        callButton.disabled = true;
                         startButton.disabled = false;
                     }
+                }
+
+                function Hangup() {
+                    setIsHangup(true);
                 }
 
                 socket.on('BackOffer', FrontAnswer)
@@ -209,6 +225,7 @@ export function Cameraview(props) {
                 socket.on('SessionActive', SessionActive)
                 socket.on('CreatePeer', MakePeer)
                 socket.on('Disconnect', RemovePeer)
+                socket.on('hangup',Hangup);
 
             }).catch(function(error){
             console.log(JSON.stringify(error));
@@ -250,14 +267,16 @@ export function Cameraview(props) {
                 </div>
                 <hr/>
                     <div className="button_container">
-                        <button id="startButton" onClick={startAction}>采集视频</button>
-                        <button id="callButton">呼叫</button>
-                        <button id="hangupButton">关闭</button>
+                        <button id="startButton" onClick={startAction}>呼叫</button>
+                        <button id="hangupButton" onClick={hangupAction}>关闭</button>
                     </div>
             <Dialog show={isModalVisible} onok={onOk} oncancel={onCancel}></Dialog>
             <RejectDialog show={isReject} onok={()=>{
                 setIsReject(false);
             }}></RejectDialog>
+            <HangupDialog show={isHangup} onok={()=>{
+                setIsHangup(false);
+            }}></HangupDialog>
         </div>
     );
 }

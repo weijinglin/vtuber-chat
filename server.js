@@ -67,7 +67,12 @@ io.on('connection', function (socket) {
     socket.on('disconnect', Disconnect)
     socket.on('called',Docall);
     socket.on('failed',Dofailed);
+    socket.on("hangup",Dohangup);
 })
+
+function Dohangup() {
+    this.broadcast.emit("hangup");
+}
 
 function Disconnect() {
     if (clients > 0) {
