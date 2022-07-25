@@ -2,11 +2,14 @@ import socket from "../model/socket";
 import Peer from 'simple-peer'
 import Dialog from "../components/Dialog";
 import {useState} from 'react';
+import RejectDialog from "../components/RejectDialog";
 
 export function Cameraview(props) {
 
     //control the visiability of Dialog
     const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const [isReject,setIsReject] = useState(false);
 
     var localVideo = document.getElementById('local_video');
     var remoteVideo = document.getElementById('remote_video');
@@ -229,8 +232,12 @@ export function Cameraview(props) {
         setIsModalVisible(false);
     }
 
-    socket.on("call",response);
+    const fail= () => {
+        setIsReject(true);
+    }
 
+    socket.on("call",response);
+    socket.on("failed",fail)
 
 
     return(
@@ -248,6 +255,9 @@ export function Cameraview(props) {
                         <button id="hangupButton">关闭</button>
                     </div>
             <Dialog show={isModalVisible} onok={onOk} oncancel={onCancel}></Dialog>
+            <RejectDialog show={isReject} onok={()=>{
+                setIsReject(false);
+            }}></RejectDialog>
         </div>
     );
 }
