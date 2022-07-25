@@ -29,7 +29,7 @@ const RejectDialog = (props) => {
             {/*    Open Modal*/}
             {/*</Button>*/}
             <Modal title="counterpart reject" visible={props.show} onOk={props.onok}
-                   okText="receive">
+                   okText="ok">
                 <p>Some contents...</p>
                 {/*<p>Some contents...</p>*/}
                 {/*<p>Some contents...</p>*/}

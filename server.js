@@ -66,6 +66,7 @@ io.on('connection', function (socket) {
     socket.on('Answer', SendAnswer)
     socket.on('disconnect', Disconnect)
     socket.on('called',Docall);
+    socket.on('failed',Dofailed);
 })
 
 function Disconnect() {
@@ -74,6 +75,10 @@ function Disconnect() {
             this.broadcast.emit("Disconnect")
         clients--
     }
+}
+
+function Dofailed() {
+    this.broadcast.emit("failed");
 }
 
 function Docall() {
