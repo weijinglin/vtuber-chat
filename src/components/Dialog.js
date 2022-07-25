@@ -21,7 +21,6 @@ const Dialog = (props) => {
     useEffect(()=>{
         console.log("debug");
         console.log(props.show);
-        console.log("test");
     },[])
 
     return (
@@ -29,10 +28,11 @@ const Dialog = (props) => {
             {/*<Button type="primary" onClick={showModal}>*/}
             {/*    Open Modal*/}
             {/*</Button>*/}
-            <Modal title="Basic Modal" visible={props.show} onOk={props.onok} onCancel={props.oncancel}>
+            <Modal title="Accept a call" visible={props.show} onOk={props.onok} onCancel={props.oncancel}
+            okText="receive" cancelText="reject">
                 <p>Some contents...</p>
-                <p>Some contents...</p>
-                <p>Some contents...</p>
+                {/*<p>Some contents...</p>*/}
+                {/*<p>Some contents...</p>*/}
             </Modal>
         </>
     );
