@@ -1,7 +1,7 @@
 import socket from "../model/socket";
 import Peer from 'simple-peer'
 import Dialog from "../components/Dialog";
-import {useState} from 'react';
+import {useRef, useState} from 'react';
 import RejectDialog from "../components/RejectDialog";
 import HangupDialog from "../components/HangupDialog";
 
@@ -14,12 +14,14 @@ export function Cameraview(props) {
 
     const [isHangup,setIsHangup] = useState(false);
 
+    const client = useRef({});
+
     var localVideo = document.getElementById('local_video');
     var remoteVideo = document.getElementById('remote_video');
     var startButton = document.getElementById('startButton');
     var hangupButton = document.getElementById('hangupButton');
     var localStream;
-    var client = {};
+    // var client = {};
     const startAction = ()=>{
         //采集摄像头视频
         localVideo = document.getElementById('local_video');
@@ -73,16 +75,16 @@ export function Cameraview(props) {
                 //for peer of type init
                 function MakePeer() {
                     console.log("make peer");
-                    client.gotAnswer = false
+                    client.current.gotAnswer = false
                     let peer = InitPeer('init')
                     console.log("signal")
                     peer.on('signal', function (data) {
                         console.log("signal boom");
-                        if (!client.gotAnswer) {
+                        if (!client.current.gotAnswer) {
                             socket.emit('Offer', data);
                         }
                     })
-                    client.peer = peer
+                    client.current.peer = peer
                 }
 
                 //for peer of type not init
@@ -92,12 +94,12 @@ export function Cameraview(props) {
                         socket.emit('Answer', data)
                     })
                     peer.signal(offer)
-                    client.peer = peer
+                    client.current.peer = peer
                 }
 
                 function SignalAnswer(answer) {
-                    client.gotAnswer = true
-                    let peer = client.peer
+                    client.current.gotAnswer = true
+                    let peer = client.current.peer
                     peer.signal(answer)
                 }
 
@@ -106,8 +108,8 @@ export function Cameraview(props) {
                 }
 
                 function RemovePeer() {
-                    if (client.peer) {
-                        client.peer.destroy();
+                    if (client.current.peer) {
+                        client.current.peer.destroy();
                         hangupButton.disabled = true;
                         startButton.disabled = false;
                     }
@@ -167,16 +169,16 @@ export function Cameraview(props) {
                 //for peer of type init
                 function MakePeer() {
                     console.log("make peer");
-                    client.gotAnswer = false
+                    client.current.gotAnswer = false
                     let peer = InitPeer('init')
                     console.log("signal")
                     peer.on('signal', function (data) {
                         console.log("signal boom");
-                        if (!client.gotAnswer) {
+                        if (!client.current.gotAnswer) {
                             socket.emit('Offer', data);
                         }
                     })
-                    client.peer = peer
+                    client.current.peer = peer
                 }
 
                 //for peer of type not init
@@ -186,12 +188,12 @@ export function Cameraview(props) {
                         socket.emit('Answer', data)
                     })
                     peer.signal(offer)
-                    client.peer = peer
+                    client.current.peer = peer
                 }
 
                 function SignalAnswer(answer) {
-                    client.gotAnswer = true
-                    let peer = client.peer
+                    client.current.gotAnswer = true
+                    let peer = client.current.peer
                     peer.signal(answer)
                 }
 
@@ -200,8 +202,8 @@ export function Cameraview(props) {
                 }
 
                 function RemovePeer() {
-                    if (client.peer) {
-                        client.peer.destroy();
+                    if (client.current.peer) {
+                        client.current.peer.destroy();
                         hangupButton.disabled = true;
                         startButton.disabled = false;
                     }
@@ -231,9 +233,10 @@ export function Cameraview(props) {
         localStream.getTracks().forEach(track => track.stop());
         console.log("in hangup");
         console.log("check peer");
-        if(client.peer){
+        console.log(client.current.peer);
+        if(client.current.peer){
             console.log("peer okk")
-            client.peer.destroy();
+            client.current.peer.destroy();
             hangupButton.disabled = true;
             startButton.disabled = false;
             socket.emit("hangup");
@@ -289,9 +292,9 @@ export function Cameraview(props) {
                     localStream = localVideo.srcObject;
                 }
                 localStream.getTracks().forEach(track => track.stop());
-                if(client.peer){
+                if(client.current.peer){
                     console.log("peer okk")
-                    client.peer.destroy();
+                    client.current.peer.destroy();
                     hangupButton.disabled = true;
                     startButton.disabled = false;
                 }
