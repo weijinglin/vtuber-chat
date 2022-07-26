@@ -3,7 +3,6 @@ import Peer from 'simple-peer'
 import Dialog from "../components/Dialog";
 import {useState} from 'react';
 import RejectDialog from "../components/RejectDialog";
-import {clear} from "@testing-library/user-event/dist/clear";
 import HangupDialog from "../components/HangupDialog";
 
 export function Cameraview(props) {
@@ -130,19 +129,6 @@ export function Cameraview(props) {
         });
     }
 
-    const hangupAction = () => {
-        localStream.getTracks().forEach(track => track.stop());
-        console.log("in hangup");
-        console.log("check peer");
-        if(client.peer){
-            console.log("peer okk")
-            client.peer.destroy();
-            hangupButton.disabled = true;
-            startButton.disabled = false;
-            socket.emit("hangup");
-        }
-    }
-
     const Response = () => {
         //采集摄像头视频
         localVideo = document.getElementById('local_video');
@@ -153,6 +139,8 @@ export function Cameraview(props) {
             .then(function(mediaStream){
                 socket.emit("called");
                 localStream = mediaStream;
+                console.log("debug");
+                console.log(localStream);
                 localVideo.srcObject = mediaStream;
                 localVideo.play();
                 startButton.disabled = true;
@@ -235,6 +223,23 @@ export function Cameraview(props) {
         });
     }
 
+    const hangupAction = () => {
+        console.log(localStream);
+        if(localStream == null){
+            localStream = localVideo.srcObject;
+        }
+        localStream.getTracks().forEach(track => track.stop());
+        console.log("in hangup");
+        console.log("check peer");
+        if(client.peer){
+            console.log("peer okk")
+            client.peer.destroy();
+            hangupButton.disabled = true;
+            startButton.disabled = false;
+            socket.emit("hangup");
+        }
+    }
+
     function response() {
         console.log("response");
         console.log(isModalVisible);
@@ -243,8 +248,10 @@ export function Cameraview(props) {
 
     const onOk = () => {
         console.log("ok hit");
-        Response();
         setIsModalVisible(false);
+        Response();
+        console.log("debug2");
+        console.log(localStream);
     }
 
     const onCancel = () => {
@@ -278,6 +285,13 @@ export function Cameraview(props) {
                 setIsReject(false);
             }}></RejectDialog>
             <HangupDialog show={isHangup} onok={()=>{
+                // localStream.getTracks().forEach(track => track.stop());
+                if(client.peer){
+                    console.log("peer okk")
+                    client.peer.destroy();
+                    hangupButton.disabled = true;
+                    startButton.disabled = false;
+                }
                 setIsHangup(false);
             }}></HangupDialog>
         </div>
