@@ -285,7 +285,10 @@ export function Cameraview(props) {
                 setIsReject(false);
             }}></RejectDialog>
             <HangupDialog show={isHangup} onok={()=>{
-                // localStream.getTracks().forEach(track => track.stop());
+                if(localStream == null){
+                    localStream = localVideo.srcObject;
+                }
+                localStream.getTracks().forEach(track => track.stop());
                 if(client.peer){
                     console.log("peer okk")
                     client.peer.destroy();
