@@ -1,4 +1,4 @@
-import "../style.css"
+import "../css/style.css"
 import * as PIXI from "pixi.js";
 import * as Kalidokit from "kalidokit";
 import '@mediapipe/holistic/holistic';
