@@ -159,10 +159,10 @@ export function VtubchatView(props) {
         await LoadRemote(modelUrl);
 
         // Add mousewheel events to scale model
-        document.querySelector("#live2d").addEventListener("wheel", (e) => {
-            e.preventDefault();
-            currentModel.scale.set(clamp(currentModel.scale.x + e.deltaY * -0.001, -0.5, 10));
-        });
+        // document.querySelector("#live2d").addEventListener("wheel", (e) => {
+        //     e.preventDefault();
+        //     currentModel.scale.set(clamp(currentModel.scale.x + e.deltaY * -0.001, -0.5, 10));
+        // });
 
         console.log("test2")
         console.log(currentModel);
@@ -227,6 +227,95 @@ export function VtubchatView(props) {
         // console.log("hit");
         // drawResults(results.multiFaceLandmarks[0]);
         animateLive2DModel(results.multiFaceLandmarks[0]);
+        animateRemoteModel(results.multiFaceLandmarks[0]);
+    };
+
+    const animateRemoteModel = (points) => {
+        if (!currentModel || !points) return;
+
+        let riggedFace;
+
+        if (points) {
+            // use kalidokit face solver
+            riggedFace = Face.solve(points, {
+                runtime: "mediapipe",
+                // video: videoElement,
+            });
+            rigRemoteFace(riggedFace, 0.5);
+        }
+    }
+
+    const rigRemoteFace = (result, lerpAmount = 0.7) => {
+        if (!remoteModel || !result) return;
+        const coreModel = remoteModel.internalModel.coreModel;
+
+        remoteModel.internalModel.motionManager.update = (...args) => {
+            // disable default blink animation
+            remoteModel.internalModel.eyeBlink = undefined;
+
+            coreModel.setParameterValueById(
+                "ParamEyeBallX",
+                lerp(result.pupil.x, coreModel.getParameterValueById("ParamEyeBallX"), lerpAmount)
+            );
+            coreModel.setParameterValueById(
+                "ParamEyeBallY",
+                lerp(result.pupil.y, coreModel.getParameterValueById("ParamEyeBallY"), lerpAmount)
+            );
+
+            // X and Y axis rotations are swapped for Live2D parameters
+            // because it is a 2D system and KalidoKit is a 3D system
+            coreModel.setParameterValueById(
+                "ParamAngleX",
+                lerp(result.head.degrees.y, coreModel.getParameterValueById("ParamAngleX"), lerpAmount)
+            );
+            coreModel.setParameterValueById(
+                "ParamAngleY",
+                lerp(result.head.degrees.x, coreModel.getParameterValueById("ParamAngleY"), lerpAmount)
+            );
+            coreModel.setParameterValueById(
+                "ParamAngleZ",
+                lerp(result.head.degrees.z, coreModel.getParameterValueById("ParamAngleZ"), lerpAmount)
+            );
+
+            // update body params for models without head/body param sync
+            const dampener = 0.3;
+            coreModel.setParameterValueById(
+                "ParamBodyAngleX",
+                lerp(result.head.degrees.y * dampener, coreModel.getParameterValueById("ParamBodyAngleX"), lerpAmount)
+            );
+            coreModel.setParameterValueById(
+                "ParamBodyAngleY",
+                lerp(result.head.degrees.x * dampener, coreModel.getParameterValueById("ParamBodyAngleY"), lerpAmount)
+            );
+            coreModel.setParameterValueById(
+                "ParamBodyAngleZ",
+                lerp(result.head.degrees.z * dampener, coreModel.getParameterValueById("ParamBodyAngleZ"), lerpAmount)
+            );
+
+            // Simple example without winking.
+            // Interpolate based on old blendshape, then stabilize blink with `Kalidokit` helper function.
+            let stabilizedEyes = Kalidokit.Face.stabilizeBlink(
+                {
+                    l: lerp(result.eye.l, coreModel.getParameterValueById("ParamEyeLOpen"), 0.7),
+                    r: lerp(result.eye.r, coreModel.getParameterValueById("ParamEyeROpen"), 0.7),
+                },
+                result.head.y
+            );
+            // eye blink
+            coreModel.setParameterValueById("ParamEyeLOpen", stabilizedEyes.l);
+            coreModel.setParameterValueById("ParamEyeROpen", stabilizedEyes.r);
+
+            // mouth
+            coreModel.setParameterValueById(
+                "ParamMouthOpenY",
+                lerp(result.mouth.y, coreModel.getParameterValueById("ParamMouthOpenY"), 0.3)
+            );
+            // Adding 0.3 to ParamMouthForm to make default more of a "smile"
+            coreModel.setParameterValueById(
+                "ParamMouthForm",
+                0.3 + lerp(result.mouth.x, coreModel.getParameterValueById("ParamMouthForm"), 0.3)
+            );
+        };
     };
 
     const animateLive2DModel = (points) => {
