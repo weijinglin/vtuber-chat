@@ -8,6 +8,9 @@ import {Camera} from '@mediapipe/camera_utils/camera_utils';
 import {useEffect,useState} from "react";
 import "pixi-live2d-display"
 
+import socket from "../model/socket";
+import Peer from 'simple-peer'
+
 // with a global PIXI variable, this plugin can automatically take
 // the needed functionality from it, such as window.PIXI.Ticker
 window.PIXI = PIXI;
@@ -20,12 +23,8 @@ const { Live2DModel } = require('pixi-live2d-display');
 
 
 export function VtubchatView(props) {
-    // console.log("???")
-
-    const [exeTime,setExeTime] = useState(0);
-
     const videoElement = document.querySelector(".input_video");
-    var guideCanvas = document.querySelector("canvas.guides");
+    // var guideCanvas = document.querySelector("canvas.guides");
 
     // Kalidokit provides a simple easing function
     // (linear interpolation) used for animation smoothness
@@ -37,21 +36,16 @@ export function VtubchatView(props) {
     } = Kalidokit;
 
     // Url to Live2D
-    //     const modelUrl = "../assets/models/hiyori/hiyori_pro_t10.model3.json";
-
     const modelUrl = "./models/hiyori/hiyori_pro_t10.model3.json";
 
     var currentModel, facemesh;
 
-    console.log("test");
-    console.log(facemesh);
-
-
-
+    // console.log("test");
+    // console.log(facemesh);
     async function main(videoElement) {
         // create pixi application
 
-        guideCanvas = document.querySelector("canvas.guides");
+        // guideCanvas = document.querySelector("canvas.guides");
         // startCamera();
         console.log("test1");
         const app = new PIXI.Application({
@@ -135,7 +129,7 @@ export function VtubchatView(props) {
         console.log("test5");
 
         // pass facemesh callback function
-        facemesh.onResults(onResults);
+        facemesh.onResults(onResult);
 
         console.log("test6");
 
@@ -145,8 +139,8 @@ export function VtubchatView(props) {
     }
 
     useEffect(()=>{
-        const videoElement = document.querySelector(".input_video"),
-            guideCanvas = document.querySelector("canvas.guides");
+        const videoElement = document.querySelector(".input_video");
+            // guideCanvas = document.querySelector("canvas.guides");
 
         console.log(videoElement);
         main(videoElement);
@@ -154,31 +148,10 @@ export function VtubchatView(props) {
 
     },[]);
 
-    const onResults = (results) => {
-        drawResults(results.multiFaceLandmarks[0]);
+    const onResult = (results) => {
+        console.log("hit");
+        // drawResults(results.multiFaceLandmarks[0]);
         animateLive2DModel(results.multiFaceLandmarks[0]);
-    };
-
-// draw connectors and landmarks on output canvas
-    const drawResults = (points) => {
-        if (!guideCanvas || !videoElement || !points) return;
-        guideCanvas.width = videoElement.videoWidth;
-        guideCanvas.height = videoElement.videoHeight;
-        let canvasCtx = guideCanvas.getContext("2d");
-        canvasCtx.save();
-        canvasCtx.clearRect(0, 0, guideCanvas.width, guideCanvas.height);
-        // Use `Mediapipe` drawing functions
-        drawConnectors(canvasCtx, points, FACEMESH_TESSELATION, {
-            color: "#C0C0C070",
-            lineWidth: 1,
-        });
-        if (points && points.length === 478) {
-            //draw pupils
-            drawLandmarks(canvasCtx, [points[468], points[468 + 5]], {
-                color: "#ffe603",
-                lineWidth: 2,
-            });
-        }
     };
 
     const animateLive2DModel = (points) => {
@@ -302,41 +275,16 @@ export function VtubchatView(props) {
 
 
     return (
-        <div id="body">
-            <div className="preview">
-                <video className="input_video" width="1280px" height="720px" ></video>
-                <canvas className="guides"></canvas>
-                <section>
-                    <a className="current" href="/live2d/"><p>Live2D</p></a>
-                    <a href="/"><p>VRM</p></a>
-                </section>
+        <div>
+            <div id="body">
+                <div className="preview">
+                    <video className="input_video" width="1280px" height="720px" ></video>
+                </div>
+                <canvas id="live2d"></canvas>
             </div>
-            {/*<h1 className="notranslate">
-            <a href="https://3d.kalidoface.com">VMEET</a>
-        </h1>
-        <nav>
-            <a href="https://www.npmjs.com/package/kalidokit">
-                <img
-                    src="https://cdn.glitch.me/447b6603-7eae-4da6-957d-73ee30c8e731%2Fnpm.png?v=1635133318451"
-                />
-            </a>
-            <a href="https://github.com/yeemachine/kalidokit">
-                <img
-                    src="https://cdn.glitch.me/447b6603-7eae-4da6-957d-73ee30c8e731%2Fgithub.png?v=1635133310517"
-                />
-            </a>
-            <a href="https://twitter.com/yeemachine">
-                <img
-                    src="https://cdn.glitch.me/447b6603-7eae-4da6-957d-73ee30c8e731%2Ftwitter.png?v=1635133322561"
-                />
-            </a>
-        </nav>*/}
-            <canvas id="live2d"></canvas>
-            {/*<p className="linkOut">
-            Visit
-            <a id="full" href="https://kalidoface.com">the full Vtuber App</a>!
-        </p>
-        <script type="module" src="./script.js"></script>*/}
+            <div>
+
+            </div>
         </div>
     );
 }
