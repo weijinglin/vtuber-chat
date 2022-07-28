@@ -51,7 +51,9 @@ export function VtubchatView(props) {
         remoteModel.scale.set(0.2);
         remoteModel.interactive = true;
         remoteModel.anchor.set(0.5, 0.8);
-        remoteModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
+        // remoteModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
+
+        remoteModel.position.set(window.innerWidth * 0.75, window.innerHeight * 1);
 
         console.log("test3");
 
@@ -80,7 +82,9 @@ export function VtubchatView(props) {
         currentModel.scale.set(0.2);
         currentModel.interactive = true;
         currentModel.anchor.set(0.5, 0.8);
-        currentModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
+        // currentModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
+
+        currentModel.position.set(window.innerWidth * 0.25, window.innerHeight * 1);
 
         console.log("test3");
 
@@ -115,7 +119,13 @@ export function VtubchatView(props) {
             resizeTo: window,
         });
 
-        
+        const remoteapp = new PIXI.Application({
+            view: document.getElementById("remote-live2d"),
+            autoStart: true,
+            backgroundAlpha: 0,
+            backgroundColor: 0xffffff,
+            resizeTo: window,
+        });
 
         // load live2d model
         // currentModel = await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json", { autoInteract: false });
@@ -144,6 +154,8 @@ export function VtubchatView(props) {
         //     }
         // });
         await LoadModel(modelUrl);
+        console.log("test1")
+        console.log(currentModel);
         await LoadRemote(modelUrl);
 
         // Add mousewheel events to scale model
@@ -152,8 +164,12 @@ export function VtubchatView(props) {
             currentModel.scale.set(clamp(currentModel.scale.x + e.deltaY * -0.001, -0.5, 10));
         });
 
+        console.log("test2")
+        console.log(currentModel);
+
         // add live2d model to stage
         app.stage.addChild(currentModel);
+        app.stage.addChild(remoteModel);
 
         if(!facemesh){
             console.log("initing...");
@@ -342,7 +358,7 @@ export function VtubchatView(props) {
                 <canvas id="live2d"></canvas>
             </div>
             <div>
-
+                <canvas id="remote-live2d"></canvas>
             </div>
         </div>
     );
