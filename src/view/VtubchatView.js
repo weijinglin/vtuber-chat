@@ -40,24 +40,38 @@ export function VtubchatView(props) {
 
     var currentModel, facemesh;
 
-    // console.log("test");
-    // console.log(facemesh);
-    async function main(videoElement) {
-        // create pixi application
+    var remoteModel;
 
-        // guideCanvas = document.querySelector("canvas.guides");
-        // startCamera();
-        console.log("test1");
-        const app = new PIXI.Application({
-            view: document.getElementById("live2d"),
-            autoStart: true,
-            backgroundAlpha: 0,
-            backgroundColor: 0xffffff,
-            resizeTo: window,
+    async function LoadRemote(modelUrl){
+        // load live2d model
+        // currentModel = await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json", { autoInteract: false });
+        // currentModel = await Live2DModel.from("shizuku.model.json", { autoInteract: false });
+        console.log(modelUrl);
+        remoteModel = await Live2DModel.from(modelUrl, { autoInteract: false });
+        remoteModel.scale.set(0.2);
+        remoteModel.interactive = true;
+        remoteModel.anchor.set(0.5, 0.8);
+        remoteModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
+
+        console.log("test3");
+
+        // Add events to drag model
+        remoteModel.on("pointerdown", (e) => {
+            remoteModel.offsetX = e.data.global.x - remoteModel.position.x;
+            remoteModel.offsetY = e.data.global.y - remoteModel.position.y;
+            remoteModel.dragging = true;
         });
+        remoteModel.on("pointerup", (e) => {
+            remoteModel.dragging = false;
+        });
+        remoteModel.on("pointermove", (e) => {
+            if (remoteModel.dragging) {
+                remoteModel.position.set(e.data.global.x - remoteModel.offsetX, e.data.global.y - remoteModel.offsetY);
+            }
+        });
+    }
 
-        console.log("test2");
-
+    async function LoadModel(modelUrl){
         // load live2d model
         // currentModel = await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json", { autoInteract: false });
         // currentModel = await Live2DModel.from("shizuku.model.json", { autoInteract: false });
@@ -84,8 +98,53 @@ export function VtubchatView(props) {
                 currentModel.position.set(e.data.global.x - currentModel.offsetX, e.data.global.y - currentModel.offsetY);
             }
         });
+    }
 
-        console.log("test4");
+    // console.log("test");
+    // console.log(facemesh);
+    async function main(videoElement) {
+        // create pixi application
+
+        // guideCanvas = document.querySelector("canvas.guides");
+        // startCamera();
+        const app = new PIXI.Application({
+            view: document.getElementById("live2d"),
+            autoStart: true,
+            backgroundAlpha: 0,
+            backgroundColor: 0xffffff,
+            resizeTo: window,
+        });
+
+        
+
+        // load live2d model
+        // currentModel = await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json", { autoInteract: false });
+        // currentModel = await Live2DModel.from("shizuku.model.json", { autoInteract: false });
+        // console.log(modelUrl);
+        // currentModel = await Live2DModel.from(modelUrl, { autoInteract: false });
+        // currentModel.scale.set(0.2);
+        // currentModel.interactive = true;
+        // currentModel.anchor.set(0.5, 0.8);
+        // currentModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
+        //
+        // console.log("test3");
+        //
+        // // Add events to drag model
+        // currentModel.on("pointerdown", (e) => {
+        //     currentModel.offsetX = e.data.global.x - currentModel.position.x;
+        //     currentModel.offsetY = e.data.global.y - currentModel.position.y;
+        //     currentModel.dragging = true;
+        // });
+        // currentModel.on("pointerup", (e) => {
+        //     currentModel.dragging = false;
+        // });
+        // currentModel.on("pointermove", (e) => {
+        //     if (currentModel.dragging) {
+        //         currentModel.position.set(e.data.global.x - currentModel.offsetX, e.data.global.y - currentModel.offsetY);
+        //     }
+        // });
+        await LoadModel(modelUrl);
+        await LoadRemote(modelUrl);
 
         // Add mousewheel events to scale model
         document.querySelector("#live2d").addEventListener("wheel", (e) => {
@@ -169,7 +228,7 @@ export function VtubchatView(props) {
         }
     };
 
-// update live2d model internal state
+    // update live2d model internal state
     const rigFace = (result, lerpAmount = 0.7) => {
         if (!currentModel || !result) return;
         const coreModel = currentModel.internalModel.coreModel;
