@@ -149,7 +149,7 @@ export function VtubchatView(props) {
     },[]);
 
     const onResult = (results) => {
-        console.log("hit");
+        // console.log("hit");
         // drawResults(results.multiFaceLandmarks[0]);
         animateLive2DModel(results.multiFaceLandmarks[0]);
     };
@@ -163,7 +163,7 @@ export function VtubchatView(props) {
             // use kalidokit face solver
             riggedFace = Face.solve(points, {
                 runtime: "mediapipe",
-                video: videoElement,
+                // video: videoElement,
             });
             rigFace(riggedFace, 0.5);
         }
