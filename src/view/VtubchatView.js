@@ -5,7 +5,7 @@ import '@mediapipe/holistic/holistic';
 import {FaceMesh,FACEMESH_TESSELATION} from "@mediapipe/face_mesh";
 import {drawConnectors,drawLandmarks} from "@mediapipe/drawing_utils";
 import {Camera} from '@mediapipe/camera_utils/camera_utils';
-import {useEffect,useState} from "react";
+import {useEffect,useRef} from "react";
 import "pixi-live2d-display"
 
 import socket from "../model/socket";
@@ -41,6 +41,9 @@ export function VtubchatView(props) {
     var currentModel, facemesh;
 
     var remoteModel;
+
+    // stand for peer connection
+    const client = useRef({});
 
     async function LoadRemote(modelUrl){
         // load live2d model
@@ -173,7 +176,7 @@ export function VtubchatView(props) {
 
     useEffect(()=>{
         const videoElement = document.querySelector(".input_video");
-            // guideCanvas = document.querySelector("canvas.guides");
+        // guideCanvas = document.querySelector("canvas.guides");
 
         console.log(videoElement);
 
@@ -423,25 +426,25 @@ export function VtubchatView(props) {
         var startButton = document.getElementById('startButton');
         var hangupButton = document.getElementById('hangupButton');
 
-
+        socket.emit("NewClient");
     }
-    
+
     const hangupAction = () => {
-      
+
     }
 
     return (
-            <div id="body">
-                <div className="preview">
-                    <video className="input_video" width="1280px" height="720px" ></video>
-                </div>
-                <canvas id="live2d"></canvas>
-                <hr/>
-                <div className="button_container">
-                    <button id="startButton" onClick={null}>呼叫</button>
-                    <button id="hangupButton" onClick={null}>关闭</button>
-                </div>
+        <div id="body">
+            <div className="preview">
+                <video className="input_video" width="1280px" height="720px" ></video>
             </div>
+            <canvas id="live2d"></canvas>
+            <hr/>
+            <div className="button_container">
+                <button id="startButton" onClick={null}>呼叫</button>
+                <button id="hangupButton" onClick={null}>关闭</button>
+            </div>
+        </div>
     );
 }
 

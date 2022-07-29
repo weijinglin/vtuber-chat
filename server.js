@@ -31,6 +31,7 @@ app.get('/',function(req,res){
 
 
 io.on('connection', function (socket) {
+    console.log("connected!!!");
     socket.on("NewClient", function () {
         console.log("receice newclient!")
         // if (clients < 2) {
