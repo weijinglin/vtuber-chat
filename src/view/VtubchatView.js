@@ -127,32 +127,6 @@ export function VtubchatView(props) {
             resizeTo: window,
         });
 
-        // load live2d model
-        // currentModel = await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json", { autoInteract: false });
-        // currentModel = await Live2DModel.from("shizuku.model.json", { autoInteract: false });
-        // console.log(modelUrl);
-        // currentModel = await Live2DModel.from(modelUrl, { autoInteract: false });
-        // currentModel.scale.set(0.2);
-        // currentModel.interactive = true;
-        // currentModel.anchor.set(0.5, 0.8);
-        // currentModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
-        //
-        // console.log("test3");
-        //
-        // // Add events to drag model
-        // currentModel.on("pointerdown", (e) => {
-        //     currentModel.offsetX = e.data.global.x - currentModel.position.x;
-        //     currentModel.offsetY = e.data.global.y - currentModel.position.y;
-        //     currentModel.dragging = true;
-        // });
-        // currentModel.on("pointerup", (e) => {
-        //     currentModel.dragging = false;
-        // });
-        // currentModel.on("pointermove", (e) => {
-        //     if (currentModel.dragging) {
-        //         currentModel.position.set(e.data.global.x - currentModel.offsetX, e.data.global.y - currentModel.offsetY);
-        //     }
-        // });
         await LoadModel(modelUrl);
         console.log("test1")
         console.log(currentModel);
@@ -408,7 +382,7 @@ export function VtubchatView(props) {
     };
 
 
-// start camera using mediapipe camera utils
+    // start camera using mediapipe camera utils
     const startCamera = (video) => {
         console.log("fix1");
         // sleep(1000);
@@ -439,17 +413,12 @@ export function VtubchatView(props) {
 
 
     return (
-        <div>
             <div id="body">
                 <div className="preview">
                     <video className="input_video" width="1280px" height="720px" ></video>
                 </div>
                 <canvas id="live2d"></canvas>
             </div>
-            <div>
-                <canvas id="remote-live2d"></canvas>
-            </div>
-        </div>
     );
 }
 
