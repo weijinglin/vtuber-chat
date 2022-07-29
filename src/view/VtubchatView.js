@@ -127,8 +127,7 @@ export function VtubchatView(props) {
         // guideCanvas = document.querySelector("canvas.guides");
         // startCamera();
         await LoadModel(modelUrl);
-        console.log("test1")
-        console.log(currentModel);
+        await LoadModel(modelUrl);
         await LoadRemote(modelUrl);
 
         // Add mousewheel events to scale model
@@ -136,9 +135,6 @@ export function VtubchatView(props) {
         //     e.preventDefault();
         //     currentModel.scale.set(clamp(currentModel.scale.x + e.deltaY * -0.001, -0.5, 10));
         // });
-
-        console.log("test2")
-        console.log(currentModel);
 
         // add live2d model to stage
         app.stage.addChild(currentModel);
@@ -162,10 +158,6 @@ export function VtubchatView(props) {
             }
         }
 
-        // console.log(facemesh);
-        // console.log("???")
-        // console.log("here");
-
         // set facemesh config
         facemesh.setOptions({
             maxNumFaces: 1,
@@ -174,16 +166,10 @@ export function VtubchatView(props) {
             minTrackingConfidence: 0.5,
         });
 
-        console.log("test5");
-
         // pass facemesh callback function
         facemesh.onResults(onResult);
 
-        console.log("test6");
-
         startCamera(videoElement);
-
-        console.log("test7");
     }
 
     // useEffect(()=>{
@@ -208,6 +194,10 @@ export function VtubchatView(props) {
     const onResult = (results) => {
         // console.log("hit");
         // drawResults(results.multiFaceLandmarks[0]);
+        if(client.current.peer){
+            console.log("send result");
+            client.current.peer.send(results);
+        }
         animateLive2DModel(results.multiFaceLandmarks[0]);
         animateRemoteModel(results.multiFaceLandmarks[0]);
     };
@@ -453,10 +443,11 @@ export function VtubchatView(props) {
             // })
 
 
-            peer.on('data', function (data) {
-                //receive the points sended counterpart
-                console.log(data);
-            })
+            // peer.on('data', function (data) {
+            //     //receive the points sended counterpart
+            //     console.log("receive data");
+            //     console.log(data);
+            // })
 
             /* the next code cause some bug in the React Frame,so comment them
 
@@ -573,10 +564,11 @@ export function VtubchatView(props) {
             // })
 
 
-            peer.on('data', function (data) {
-                //receive the points sended counterpart
-                console.log(data);
-            })
+            // peer.on('data', function (data) {
+            //     //receive the points sended counterpart
+            //     console.log("receive data");
+            //     console.log(data);
+            // })
 
             /* the next code cause some bug in the React Frame,so comment them
 
