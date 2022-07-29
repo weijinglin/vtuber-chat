@@ -106,27 +106,11 @@ export function VtubchatView(props) {
 
     // console.log("test");
     // console.log(facemesh);
-    async function main(videoElement) {
+    async function main(videoElement,app) {
         // create pixi application
 
         // guideCanvas = document.querySelector("canvas.guides");
         // startCamera();
-        const app = new PIXI.Application({
-            view: document.getElementById("live2d"),
-            autoStart: true,
-            backgroundAlpha: 0,
-            backgroundColor: 0xffffff,
-            resizeTo: window,
-        });
-
-        const remoteapp = new PIXI.Application({
-            view: document.getElementById("remote-live2d"),
-            autoStart: true,
-            backgroundAlpha: 0,
-            backgroundColor: 0xffffff,
-            resizeTo: window,
-        });
-
         await LoadModel(modelUrl);
         console.log("test1")
         console.log(currentModel);
@@ -192,7 +176,16 @@ export function VtubchatView(props) {
             // guideCanvas = document.querySelector("canvas.guides");
 
         console.log(videoElement);
-        main(videoElement);
+
+        const app = new PIXI.Application({
+            view: document.getElementById("live2d"),
+            autoStart: true,
+            backgroundAlpha: 0,
+            backgroundColor: 0xffffff,
+            resizeTo: window,
+        });
+
+        main(videoElement,app);
         // setExeTime(1);
 
     },[]);
@@ -411,6 +404,31 @@ export function VtubchatView(props) {
     };
 
 
+    const startAction = () => {
+        const videoElement = document.querySelector(".input_video");
+        // guideCanvas = document.querySelector("canvas.guides");
+
+        console.log(videoElement);
+        //the function main can pass modelURL latter
+        const app = new PIXI.Application({
+            view: document.getElementById("live2d"),
+            autoStart: true,
+            backgroundAlpha: 0,
+            backgroundColor: 0xffffff,
+            resizeTo: window,
+        });
+
+        main(videoElement,app);
+
+        var startButton = document.getElementById('startButton');
+        var hangupButton = document.getElementById('hangupButton');
+
+
+    }
+    
+    const hangupAction = () => {
+      
+    }
 
     return (
             <div id="body">
@@ -418,6 +436,11 @@ export function VtubchatView(props) {
                     <video className="input_video" width="1280px" height="720px" ></video>
                 </div>
                 <canvas id="live2d"></canvas>
+                <hr/>
+                <div className="button_container">
+                    <button id="startButton" onClick={null}>呼叫</button>
+                    <button id="hangupButton" onClick={null}>关闭</button>
+                </div>
             </div>
     );
 }
