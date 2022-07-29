@@ -426,7 +426,95 @@ export function VtubchatView(props) {
         var startButton = document.getElementById('startButton');
         var hangupButton = document.getElementById('hangupButton');
 
+        // add the logic of building peer connection
+        // the signal to build connection
         socket.emit("NewClient");
+
+        //used to initialize a peer
+        function InitPeer(type) {
+            let peer = new Peer({ initiator: (type == 'init') ? true : false , trickle: false})
+            console.log("type " + type);
+            //This isn't working in chrome; works perfectly in firefox.
+            // peer.on('close', function () {
+            //     document.getElementById("peerVideo").remove();
+            //     peer.destroy()
+            // })
+
+
+            peer.on('data', function (data) {
+                //receive the points sended counterpart
+                console.log(data);
+            })
+
+            /* the next code cause some bug in the React Frame,so comment them
+
+            peer.on('data', function (data) {
+                let decodedData = new TextDecoder('utf-8').decode(data)
+                let peervideo = document.querySelector('#remote_video')
+                peervideo.style.filter = decodedData
+            })
+            console.log("debug")
+
+            */
+
+            return peer
+        }
+
+        //for peer of type init
+        function MakePeer() {
+            console.log("make peer");
+            client.current.gotAnswer = false
+            let peer = InitPeer('init')
+            console.log("signal")
+            peer.on('signal', function (data) {
+                console.log("signal boom");
+                if (!client.current.gotAnswer) {
+                    socket.emit('Offer', data);
+                }
+            })
+            client.current.peer = peer
+        }
+
+        //for peer of type not init
+        function FrontAnswer(offer) {
+            let peer = InitPeer('notInit')
+            peer.on('signal', (data) => {
+                socket.emit('Answer', data)
+            })
+            peer.signal(offer)
+            client.current.peer = peer
+        }
+
+        function SignalAnswer(answer) {
+            client.current.gotAnswer = true
+            let peer = client.current.peer
+            peer.signal(answer)
+        }
+
+        function SessionActive() {
+            document.write('Session Active. Please come back later')
+        }
+
+        function RemovePeer() {
+            if (client.current.peer) {
+                client.current.peer.destroy();
+                hangupButton.disabled = true;
+                startButton.disabled = false;
+            }
+        }
+
+        function Hangup() {
+            // setIsHangup(true);
+        }
+
+        socket.on('BackOffer', FrontAnswer)
+        socket.on('BackAnswer', SignalAnswer)
+        socket.on('SessionActive', SessionActive)
+        socket.on('CreatePeer', MakePeer)
+        socket.on('Disconnect', RemovePeer)
+        socket.on('hangup',Hangup);
+
+
     }
 
     const hangupAction = () => {
