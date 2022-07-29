@@ -267,7 +267,7 @@ export function Cameraview(props) {
     }
 
     socket.on("call",response);
-    socket.on("failed",fail)
+    socket.on("failed",fail);
 
 
     return(

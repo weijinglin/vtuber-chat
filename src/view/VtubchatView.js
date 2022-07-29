@@ -5,11 +5,14 @@ import '@mediapipe/holistic/holistic';
 import {FaceMesh,FACEMESH_TESSELATION} from "@mediapipe/face_mesh";
 import {drawConnectors,drawLandmarks} from "@mediapipe/drawing_utils";
 import {Camera} from '@mediapipe/camera_utils/camera_utils';
-import {useEffect,useRef} from "react";
+import {useEffect,useRef,useState} from "react";
 import "pixi-live2d-display"
 
 import socket from "../model/socket";
 import Peer from 'simple-peer'
+import Dialog from "../components/Dialog";
+import RejectDialog from "../components/RejectDialog";
+import HangupDialog from "../components/HangupDialog";
 
 // with a global PIXI variable, this plugin can automatically take
 // the needed functionality from it, such as window.PIXI.Ticker
@@ -23,6 +26,15 @@ const { Live2DModel } = require('pixi-live2d-display');
 
 
 export function VtubchatView(props) {
+
+    //control the visiability of Dialog
+    const [isModalVisible, setIsModalVisible] = useState(false);
+
+    const [isReject,setIsReject] = useState(false);
+
+    const [isHangup,setIsHangup] = useState(false);
+
+
     const videoElement = document.querySelector(".input_video");
     // var guideCanvas = document.querySelector("canvas.guides");
 
@@ -174,24 +186,24 @@ export function VtubchatView(props) {
         console.log("test7");
     }
 
-    useEffect(()=>{
-        const videoElement = document.querySelector(".input_video");
-        // guideCanvas = document.querySelector("canvas.guides");
-
-        console.log(videoElement);
-
-        const app = new PIXI.Application({
-            view: document.getElementById("live2d"),
-            autoStart: true,
-            backgroundAlpha: 0,
-            backgroundColor: 0xffffff,
-            resizeTo: window,
-        });
-
-        main(videoElement,app);
-        // setExeTime(1);
-
-    },[]);
+    // useEffect(()=>{
+    //     const videoElement = document.querySelector(".input_video");
+    //     // guideCanvas = document.querySelector("canvas.guides");
+    //
+    //     console.log(videoElement);
+    //
+    //     const app = new PIXI.Application({
+    //         view: document.getElementById("live2d"),
+    //         autoStart: true,
+    //         backgroundAlpha: 0,
+    //         backgroundColor: 0xffffff,
+    //         resizeTo: window,
+    //     });
+    //
+    //     main(videoElement,app);
+    //     // setExeTime(1);
+    //
+    // },[]);
 
     const onResult = (results) => {
         // console.log("hit");
@@ -517,9 +529,142 @@ export function VtubchatView(props) {
 
     }
 
+    function response() {
+        console.log("response");
+        console.log(isModalVisible);
+        setIsModalVisible(true);
+    }
+
+    const fail= () => {
+        setIsReject(true);
+    }
+
+    const Response = () => {
+        const videoElement = document.querySelector(".input_video");
+        // guideCanvas = document.querySelector("canvas.guides");
+
+        console.log(videoElement);
+        //the function main can pass modelURL latter
+        const app = new PIXI.Application({
+            view: document.getElementById("live2d"),
+            autoStart: true,
+            backgroundAlpha: 0,
+            backgroundColor: 0xffffff,
+            resizeTo: window,
+        });
+
+        main(videoElement,app);
+
+        var startButton = document.getElementById('startButton');
+        var hangupButton = document.getElementById('hangupButton');
+
+        // add the logic of building peer connection
+        // the signal to build connection
+        socket.emit("called");
+
+        //used to initialize a peer
+        function InitPeer(type) {
+            let peer = new Peer({ initiator: (type == 'init') ? true : false , trickle: false})
+            console.log("type " + type);
+            //This isn't working in chrome; works perfectly in firefox.
+            // peer.on('close', function () {
+            //     document.getElementById("peerVideo").remove();
+            //     peer.destroy()
+            // })
+
+
+            peer.on('data', function (data) {
+                //receive the points sended counterpart
+                console.log(data);
+            })
+
+            /* the next code cause some bug in the React Frame,so comment them
+
+            peer.on('data', function (data) {
+                let decodedData = new TextDecoder('utf-8').decode(data)
+                let peervideo = document.querySelector('#remote_video')
+                peervideo.style.filter = decodedData
+            })
+            console.log("debug")
+
+            */
+
+            return peer
+        }
+
+        //for peer of type init
+        function MakePeer() {
+            console.log("make peer");
+            client.current.gotAnswer = false
+            let peer = InitPeer('init')
+            console.log("signal")
+            peer.on('signal', function (data) {
+                console.log("signal boom");
+                if (!client.current.gotAnswer) {
+                    socket.emit('Offer', data);
+                }
+            })
+            client.current.peer = peer
+        }
+
+        //for peer of type not init
+        function FrontAnswer(offer) {
+            let peer = InitPeer('notInit')
+            peer.on('signal', (data) => {
+                socket.emit('Answer', data)
+            })
+            peer.signal(offer)
+            client.current.peer = peer
+        }
+
+        function SignalAnswer(answer) {
+            client.current.gotAnswer = true
+            let peer = client.current.peer
+            peer.signal(answer)
+        }
+
+        function SessionActive() {
+            document.write('Session Active. Please come back later')
+        }
+
+        function RemovePeer() {
+            if (client.current.peer) {
+                client.current.peer.destroy();
+                hangupButton.disabled = true;
+                startButton.disabled = false;
+            }
+        }
+
+        function Hangup() {
+            // setIsHangup(true);
+        }
+
+        socket.on('BackOffer', FrontAnswer)
+        socket.on('BackAnswer', SignalAnswer)
+        socket.on('SessionActive', SessionActive)
+        socket.on('CreatePeer', MakePeer)
+        socket.on('Disconnect', RemovePeer)
+        socket.on('hangup',Hangup);
+    }
+
     const hangupAction = () => {
 
     }
+
+    const onOk = () => {
+        console.log("ok hit");
+        setIsModalVisible(false);
+        Response();
+        console.log("debug2");
+    }
+
+    const onCancel = () => {
+        socket.emit("failed");
+        setIsModalVisible(false);
+    }
+
+    socket.on("call",response);
+    socket.on("failed",fail);
 
     return (
         <div id="body">
@@ -529,9 +674,17 @@ export function VtubchatView(props) {
             <canvas id="live2d"></canvas>
             <hr/>
             <div className="button_container">
-                <button id="startButton" onClick={null}>呼叫</button>
+                <button id="startButton" onClick={startAction}>呼叫</button>
                 <button id="hangupButton" onClick={null}>关闭</button>
             </div>
+            <Dialog show={isModalVisible} onok={onOk} oncancel={onCancel}></Dialog>
+            <RejectDialog show={isReject} onok={()=>{
+                setIsReject(false);
+            }}></RejectDialog>
+            <HangupDialog show={isHangup} onok={()=>{
+                //need to add the logic of hangup
+                setIsHangup(false);
+            }}></HangupDialog>
         </div>
     );
 }
