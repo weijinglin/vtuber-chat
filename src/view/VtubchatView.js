@@ -57,6 +57,8 @@ export function VtubchatView(props) {
     // stand for peer connection
     const client = useRef({});
 
+    const dc = useRef();
+
     async function LoadRemote(modelUrl){
         // load live2d model
         // currentModel = await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json", { autoInteract: false });
@@ -179,9 +181,9 @@ export function VtubchatView(props) {
             }
 
             client.current.p2p.ondatachannel = e => {
-                client.current.p2p.dc = e.channel;
-                client.current.p2p.dc.onmessage = e => console.log("got message from client : " + e.data);
-                client.current.p2p.dc.onopen = e => console.log("Connection open ! ! !");
+                dc.current = e.channel;
+                dc.current.onmessage = e => console.log("got message from client : " + e.data);
+                dc.current.onopen = e => console.log("Connection open ! ! !");
             }
 
             client.current.p2p.setRemoteDescription(offer).then(e => console.log("offer set done"));
@@ -193,6 +195,7 @@ export function VtubchatView(props) {
         socket.on("back_ans",data => {
             const answer = JSON.parse(data.answer);
             client.current.p2p.setRemoteDescription(answer);
+            dc.current.send("test string");
         })
     }
 
@@ -221,12 +224,7 @@ export function VtubchatView(props) {
 
 
     const onResult = (results) => {
-        // console.log("hit");
-        // drawResults(results.multiFaceLandmarks[0]);
-        // if(client.current.peer){
-        //     console.log("send result");
-        //     client.current.peer.send(results);
-        // }
+
         animateLive2DModel(results.multiFaceLandmarks[0]);
         animateRemoteModel(results.multiFaceLandmarks[0]);
     };
@@ -439,11 +437,11 @@ export function VtubchatView(props) {
             ]
         });
 
-        const dc = client.current.p2p.createDataChannel("channel")
+        dc.current = client.current.p2p.createDataChannel("channel")
 
-        dc.onmessage = e => console.log("got message : " + e.data)
+        dc.current.onmessage = e => console.log("got message : " + e.data)
 
-        dc.onopen = e => console.log("connection open!!!");
+        dc.current.onopen = e => console.log("connection open!!!");
 
         client.current.p2p.onicecandidate = e => {
             console.log("New ice candidate, reprinting SDP : " + JSON.stringify(client.current.p2p.localDescription));
