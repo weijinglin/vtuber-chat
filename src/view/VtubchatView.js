@@ -162,11 +162,42 @@ export function VtubchatView(props) {
     }
 
     const socketInit = () => {
+        socket.on("try_con",data => {
+            console.log("debug");
+            console.log(data.offer);
+            const offer = JSON.parse(data.offer);
+            client.current.p2p = new RTCPeerConnection({
+                iceServers: [
+                    { urls: "stun:stun.l.google.com:19302"}, // 谷歌的公共服务
+                ]
+            })
+
+            client.current.p2p.onicecandidate = e => {
+                console.log("New ice candidate, reprinting SDP : " + JSON.stringify(client.current.p2p.localDescription));
+                const data = JSON.stringify(client.current.p2p.localDescription);
+                socket.emit("answer",{answer: data})
+            }
+
+            client.current.p2p.ondatachannel = e => {
+                client.current.p2p.dc = e.channel;
+                client.current.p2p.dc.onmessage = e => console.log("got message from client : " + e.data);
+                client.current.p2p.dc.onopen = e => console.log("Connection open ! ! !");
+            }
+
+            client.current.p2p.setRemoteDescription(offer).then(e => console.log("offer set done"));
+
+            client.current.p2p.createAnswer().then(a => client.current.p2p.setLocalDescription(a)).then(a => console.log("answer created"));
+        })
 
 
+        socket.on("back_ans",data => {
+            const answer = JSON.parse(data.answer);
+            client.current.p2p.setRemoteDescription(answer);
+        })
     }
 
     useEffect(()=>{
+        socketInit();
         const videoElement = document.querySelector(".input_video");
         // guideCanvas = document.querySelector("canvas.guides");
 
@@ -417,7 +448,7 @@ export function VtubchatView(props) {
         client.current.p2p.onicecandidate = e => {
             console.log("New ice candidate, reprinting SDP : " + JSON.stringify(client.current.p2p.localDescription));
             const data = JSON.stringify(client.current.p2p.localDescription);
-            socket.emit("con_req",{ description: 'A custom event named testerEvent!'});
+            socket.emit("con_req",{ offer: data});
         }
 
         client.current.p2p.createOffer().then(o => client.current.p2p.setLocalDescription(o)).then(a => console.log("set successful"));

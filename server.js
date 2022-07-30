@@ -72,11 +72,17 @@ io.on('connection', function (socket) {
 
     //the code used in vutbView
     socket.on("con_req",v_con);
+    socket.on("answer",re_ans);
 })
 
 function v_con(data) {
     console.log(data);
-    this.broadcast.emit("try_con");
+    this.broadcast.emit("try_con",data);
+}
+
+function re_ans(data) {
+    console.log(data);
+    this.broadcast.emit("back_ans",data);
 }
 
 function Dohangup() {
