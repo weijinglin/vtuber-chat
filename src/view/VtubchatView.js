@@ -61,7 +61,6 @@ export function VtubchatView(props) {
         // load live2d model
         // currentModel = await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json", { autoInteract: false });
         // currentModel = await Live2DModel.from("shizuku.model.json", { autoInteract: false });
-        console.log(modelUrl);
         remoteModel = await Live2DModel.from(modelUrl, { autoInteract: false });
         remoteModel.scale.set(0.2);
         remoteModel.interactive = true;
@@ -69,8 +68,6 @@ export function VtubchatView(props) {
         // remoteModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
 
         remoteModel.position.set(window.innerWidth * 0.75, window.innerHeight * 1);
-
-        console.log("test3");
 
         // Add events to drag model
         remoteModel.on("pointerdown", (e) => {
@@ -92,7 +89,6 @@ export function VtubchatView(props) {
         // load live2d model
         // currentModel = await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json", { autoInteract: false });
         // currentModel = await Live2DModel.from("shizuku.model.json", { autoInteract: false });
-        console.log(modelUrl);
         currentModel = await Live2DModel.from(modelUrl, { autoInteract: false });
         currentModel.scale.set(0.2);
         currentModel.interactive = true;
@@ -100,8 +96,6 @@ export function VtubchatView(props) {
         // currentModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
 
         currentModel.position.set(window.innerWidth * 0.25, window.innerHeight * 1);
-
-        console.log("test3");
 
         // Add events to drag model
         currentModel.on("pointerdown", (e) => {
@@ -119,8 +113,6 @@ export function VtubchatView(props) {
         });
     }
 
-    // console.log("test");
-    // console.log(facemesh);
     async function main(videoElement,app) {
         // create pixi application
 
@@ -141,12 +133,9 @@ export function VtubchatView(props) {
         app.stage.addChild(remoteModel);
 
         if(!facemesh){
-            console.log("initing...");
             // create media pipe facemesh instance
             facemesh = new FaceMesh({
                 locateFile: (file) => {
-                    // console.log("loading...")
-                    console.log(file);
                     return `https://cdn.jsdelivr.net/npm/@mediapipe/face_mesh/${file}`;
                 },
             });
@@ -194,10 +183,10 @@ export function VtubchatView(props) {
     const onResult = (results) => {
         // console.log("hit");
         // drawResults(results.multiFaceLandmarks[0]);
-        if(client.current.peer){
-            console.log("send result");
-            client.current.peer.send(results);
-        }
+        // if(client.current.peer){
+        //     console.log("send result");
+        //     client.current.peer.send(results);
+        // }
         animateLive2DModel(results.multiFaceLandmarks[0]);
         animateRemoteModel(results.multiFaceLandmarks[0]);
     };
@@ -382,11 +371,7 @@ export function VtubchatView(props) {
 
     // start camera using mediapipe camera utils
     const startCamera = (video) => {
-        console.log("fix1");
         // sleep(1000);
-        if(!facemesh){
-            console.log("aaaaaaaa");
-        }
         const camera = new Camera(video, {
             onFrame: async () => {
                 //console.log("fix");
@@ -396,8 +381,6 @@ export function VtubchatView(props) {
             width: 640,
             height: 480,
         });
-        console.log("fix2");
-        console.log(camera);
         if(camera.video === null){
             // window.location.reload();
             // setExeTime(0);
@@ -420,12 +403,10 @@ export function VtubchatView(props) {
         //used to initialize a peer
         function InitPeer(type) {
             let peer = new Peer({ initiator: (type == 'init') ? true : false , trickle: false,objectMode: true})
-            console.log("type " + type);
             //This isn't working in chrome; works perfectly in firefox.
-            // peer.on('close', function () {
-            //     document.getElementById("peerVideo").remove();
-            //     peer.destroy()
-            // })
+            peer.on('close', function () {
+                console.log("peer connection closed");
+            })
 
             peer.on('connect',function () {
                 console.log("connected!");
@@ -448,6 +429,7 @@ export function VtubchatView(props) {
                         console.log('got a message from peer1: ' + data)
                     });
                     console.log("successful")
+                    peer.send("test1");
                 }catch (error){
                     console.log("print error")
                     console.log(error);
@@ -544,7 +526,6 @@ export function VtubchatView(props) {
     }
 
     function response() {
-        console.log("response");
         console.log(isModalVisible);
         setIsModalVisible(true);
     }
@@ -564,12 +545,10 @@ export function VtubchatView(props) {
         //used to initialize a peer
         function InitPeer(type) {
             let peer = new Peer({ initiator: (type == 'init') ? true : false , trickle: false,objectMode: true})
-            console.log("type " + type);
             //This isn't working in chrome; works perfectly in firefox.
-            // peer.on('close', function () {
-            //     document.getElementById("peerVideo").remove();
-            //     peer.destroy()
-            // })
+            peer.on('close', function () {
+                console.log("peer connection closed");
+            })
 
             peer.on('connect',function () {
                 console.log("connected!");
@@ -589,6 +568,12 @@ export function VtubchatView(props) {
                         // got a data channel message
                         console.log('got a message from peer1: ' + data)
                     })
+                    peer.send("test1");
+                    peer.send("test1");
+                    peer.send("test1");
+                    peer.send("test1");
+                    peer.send("test1");
+                    peer.send("test1");
                     console.log("successful")
                 }catch (error){
                     console.log("print error")
@@ -634,7 +619,6 @@ export function VtubchatView(props) {
             console.log("make peer");
             client.current.gotAnswer = false
             let peer = InitPeer('init')
-            console.log("signal")
             peer.on('signal', function (data) {
                 console.log("signal boom");
                 if (!client.current.gotAnswer) {
@@ -692,7 +676,6 @@ export function VtubchatView(props) {
         console.log("ok hit");
         setIsModalVisible(false);
         Response();
-        console.log("debug2");
     }
 
     const onCancel = () => {
