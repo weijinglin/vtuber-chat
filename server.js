@@ -69,7 +69,15 @@ io.on('connection', function (socket) {
     socket.on('called',Docall);
     socket.on('failed',Dofailed);
     socket.on("hangup",Dohangup);
+
+    //the code used in vutbView
+    socket.on("con_req",v_con);
 })
+
+function v_con(data) {
+    console.log(data);
+    this.broadcast.emit("try_con");
+}
 
 function Dohangup() {
     console.log("hangup");

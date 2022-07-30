@@ -161,24 +161,33 @@ export function VtubchatView(props) {
         startCamera(videoElement);
     }
 
-    // useEffect(()=>{
-    //     const videoElement = document.querySelector(".input_video");
-    //     // guideCanvas = document.querySelector("canvas.guides");
-    //
-    //     console.log(videoElement);
-    //
-    //     const app = new PIXI.Application({
-    //         view: document.getElementById("live2d"),
-    //         autoStart: true,
-    //         backgroundAlpha: 0,
-    //         backgroundColor: 0xffffff,
-    //         resizeTo: window,
-    //     });
-    //
-    //     main(videoElement,app);
-    //     // setExeTime(1);
-    //
-    // },[]);
+    const socketInit = () => {
+
+
+    }
+
+    useEffect(()=>{
+        const videoElement = document.querySelector(".input_video");
+        // guideCanvas = document.querySelector("canvas.guides");
+
+        console.log(videoElement);
+
+        const app = new PIXI.Application({
+            view: document.getElementById("live2d"),
+            autoStart: true,
+            backgroundAlpha: 0,
+            backgroundColor: 0xffffff,
+            resizeTo: window,
+        });
+
+        main(videoElement,app);
+        // setExeTime(1);
+
+
+
+    },[]);
+
+
 
     const onResult = (results) => {
         // console.log("hit");
@@ -391,300 +400,30 @@ export function VtubchatView(props) {
         // console.log("fix3");
     };
 
-
+    //连接的发起方进行的操作
     const startAction = () => {
-        var startButton = document.getElementById('startButton');
-        var hangupButton = document.getElementById('hangupButton');
+        client.current.p2p = new RTCPeerConnection({
+            iceServers: [
+                { urls: "stun:stun.l.google.com:19302"}, // 谷歌的公共服务
+            ]
+        });
 
-        // add the logic of building peer connection
-        // the signal to build connection
-        socket.emit("NewClient");
+        const dc = client.current.p2p.createDataChannel("channel")
 
-        //used to initialize a peer
-        function InitPeer(type) {
-            let peer = new Peer({ initiator: (type == 'init') ? true : false , trickle: false,objectMode: true})
-            //This isn't working in chrome; works perfectly in firefox.
-            peer.on('close', function () {
-                console.log("peer connection closed");
-            })
+        dc.onmessage = e => console.log("got message : " + e.data)
 
-            peer.on('connect',function () {
-                console.log("connected!");
-                console.log(peer);
-                peer.send("okk");
-                const videoElement = document.querySelector(".input_video");
-                //the function main can pass modelURL latter
-                const app = new PIXI.Application({
-                    view: document.getElementById("live2d"),
-                    autoStart: true,
-                    backgroundAlpha: 0,
-                    backgroundColor: 0xffffff,
-                    resizeTo: window,
-                });
+        dc.onopen = e => console.log("connection open!!!");
 
-                try{
-                    console.log(this);
-                    this.on("data", data => {
-                        // got a data channel message
-                        console.log('got a message from peer1: ' + data)
-                    });
-                    console.log("successful")
-                    peer.send("test1");
-                }catch (error){
-                    console.log("print error")
-                    console.log(error);
-                }
-
-                main(videoElement,app);
-            })
-
-            peer.on('error', err => console.log('error', err))
-
-            console.log("debug1")
-
-            try{
-                peer.on("data", data => {
-                    // got a data channel message
-                    console.log('got a message from peer1: ' + data)
-                })
-            }catch (error){
-                console.log("print error")
-                console.log(error);
-            }
-
-            console.log("debug2")
-
-            /* the next code cause some bug in the React Frame,so comment them
-
-            peer.on('data', function (data) {
-                let decodedData = new TextDecoder('utf-8').decode(data)
-                let peervideo = document.querySelector('#remote_video')
-                peervideo.style.filter = decodedData
-            })
-            console.log("debug")
-
-            */
-
-            return peer
+        client.current.p2p.onicecandidate = e => {
+            console.log("New ice candidate, reprinting SDP : " + JSON.stringify(client.current.p2p.localDescription));
+            const data = JSON.stringify(client.current.p2p.localDescription);
+            socket.emit("con_req",{ description: 'A custom event named testerEvent!'});
         }
 
-        //for peer of type init
-        function MakePeer() {
-            console.log("make peer");
-            client.current.gotAnswer = false
-            let peer = InitPeer('init')
-            console.log("signal")
-            peer.on('signal', function (data) {
-                console.log("signal boom");
-                if (!client.current.gotAnswer) {
-                    socket.emit('Offer', data);
-                }
-            })
-            client.current.peer = peer
-        }
-
-        //for peer of type not init
-        function FrontAnswer(offer) {
-            let peer = InitPeer('notInit')
-            peer.on('signal', (data) => {
-                socket.emit('Answer', data)
-            })
-            peer.signal(offer)
-            client.current.peer = peer
-        }
-
-        function SignalAnswer(answer) {
-            client.current.gotAnswer = true
-            let peer = client.current.peer
-            peer.signal(answer)
-        }
-
-        function SessionActive() {
-            document.write('Session Active. Please come back later')
-        }
-
-        function RemovePeer() {
-            if (client.current.peer) {
-                client.current.peer.destroy();
-                hangupButton.disabled = true;
-                startButton.disabled = false;
-            }
-        }
-
-        function Hangup() {
-            // setIsHangup(true);
-        }
-
-        socket.on('BackOffer', FrontAnswer)
-        socket.on('BackAnswer', SignalAnswer)
-        socket.on('SessionActive', SessionActive)
-        socket.on('CreatePeer', MakePeer)
-        socket.on('Disconnect', RemovePeer)
-        socket.on('hangup',Hangup);
-
-
+        client.current.p2p.createOffer().then(o => client.current.p2p.setLocalDescription(o)).then(a => console.log("set successful"));
     }
 
-    function response() {
-        console.log(isModalVisible);
-        setIsModalVisible(true);
-    }
 
-    const fail= () => {
-        setIsReject(true);
-    }
-
-    const Response = () => {
-        var startButton = document.getElementById('startButton');
-        var hangupButton = document.getElementById('hangupButton');
-
-        // add the logic of building peer connection
-        // the signal to build connection
-        socket.emit("called");
-
-        //used to initialize a peer
-        function InitPeer(type) {
-            let peer = new Peer({ initiator: (type == 'init') ? true : false , trickle: false,objectMode: true})
-            //This isn't working in chrome; works perfectly in firefox.
-            peer.on('close', function () {
-                console.log("peer connection closed");
-            })
-
-            peer.on('connect',function () {
-                console.log("connected!");
-                const videoElement = document.querySelector(".input_video");
-                //the function main can pass modelURL latter
-                const app = new PIXI.Application({
-                    view: document.getElementById("live2d"),
-                    autoStart: true,
-                    backgroundAlpha: 0,
-                    backgroundColor: 0xffffff,
-                    resizeTo: window,
-                });
-
-                try{
-                    console.log(this);
-                    this.on("data", data => {
-                        // got a data channel message
-                        console.log('got a message from peer1: ' + data)
-                    })
-                    peer.send("test1");
-                    peer.send("test1");
-                    peer.send("test1");
-                    peer.send("test1");
-                    peer.send("test1");
-                    peer.send("test1");
-                    console.log("successful")
-                }catch (error){
-                    console.log("print error")
-                    console.log(error);
-                }
-
-                main(videoElement,app);
-
-            })
-
-            peer.on('error', err => console.log('error', err))
-
-            console.log("debug1")
-
-            try{
-                peer.on("data", data => {
-                    // got a data channel message
-                    console.log('got a message from peer1: ' + data)
-                })
-            }catch (error){
-                console.log("print error")
-                console.log(error);
-            }
-
-            console.log("debug2")
-
-            /* the next code cause some bug in the React Frame,so comment them
-
-            peer.on('data', function (data) {
-                let decodedData = new TextDecoder('utf-8').decode(data)
-                let peervideo = document.querySelector('#remote_video')
-                peervideo.style.filter = decodedData
-            })
-            console.log("debug")
-
-            */
-
-            return peer
-        }
-
-        //for peer of type init
-        function MakePeer() {
-            console.log("make peer");
-            client.current.gotAnswer = false
-            let peer = InitPeer('init')
-            peer.on('signal', function (data) {
-                console.log("signal boom");
-                if (!client.current.gotAnswer) {
-                    socket.emit('Offer', data);
-                }
-            })
-            client.current.peer = peer
-        }
-
-        //for peer of type not init
-        function FrontAnswer(offer) {
-            let peer = InitPeer('notInit')
-            peer.on('signal', (data) => {
-                socket.emit('Answer', data)
-            })
-            peer.signal(offer)
-            client.current.peer = peer
-        }
-
-        function SignalAnswer(answer) {
-            client.current.gotAnswer = true
-            let peer = client.current.peer
-            peer.signal(answer)
-        }
-
-        function SessionActive() {
-            document.write('Session Active. Please come back later')
-        }
-
-        function RemovePeer() {
-            if (client.current.peer) {
-                client.current.peer.destroy();
-                hangupButton.disabled = true;
-                startButton.disabled = false;
-            }
-        }
-
-        function Hangup() {
-            // setIsHangup(true);
-        }
-
-        socket.on('BackOffer', FrontAnswer)
-        socket.on('BackAnswer', SignalAnswer)
-        socket.on('SessionActive', SessionActive)
-        socket.on('CreatePeer', MakePeer)
-        socket.on('Disconnect', RemovePeer)
-        socket.on('hangup',Hangup);
-    }
-
-    const hangupAction = () => {
-
-    }
-
-    const onOk = () => {
-        console.log("ok hit");
-        setIsModalVisible(false);
-        Response();
-    }
-
-    const onCancel = () => {
-        socket.emit("failed");
-        setIsModalVisible(false);
-    }
-
-    socket.on("call",response);
-    socket.on("failed",fail);
 
     return (
         <div id="body">
@@ -697,7 +436,7 @@ export function VtubchatView(props) {
                 <button id="startButton" onClick={startAction}>呼叫</button>
                 <button id="hangupButton" onClick={null}>关闭</button>
             </div>
-            <Dialog show={isModalVisible} onok={onOk} oncancel={onCancel}></Dialog>
+            <Dialog show={isModalVisible} onok={null} oncancel={null}></Dialog>
             <RejectDialog show={isReject} onok={()=>{
                 setIsReject(false);
             }}></RejectDialog>
