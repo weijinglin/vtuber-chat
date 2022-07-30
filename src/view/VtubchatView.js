@@ -410,21 +410,6 @@ export function VtubchatView(props) {
 
 
     const startAction = () => {
-        const videoElement = document.querySelector(".input_video");
-        // guideCanvas = document.querySelector("canvas.guides");
-
-        console.log(videoElement);
-        //the function main can pass modelURL latter
-        const app = new PIXI.Application({
-            view: document.getElementById("live2d"),
-            autoStart: true,
-            backgroundAlpha: 0,
-            backgroundColor: 0xffffff,
-            resizeTo: window,
-        });
-
-        main(videoElement,app);
-
         var startButton = document.getElementById('startButton');
         var hangupButton = document.getElementById('hangupButton');
 
@@ -434,7 +419,7 @@ export function VtubchatView(props) {
 
         //used to initialize a peer
         function InitPeer(type) {
-            let peer = new Peer({ initiator: (type == 'init') ? true : false , trickle: false})
+            let peer = new Peer({ initiator: (type == 'init') ? true : false , trickle: false,objectMode: true})
             console.log("type " + type);
             //This isn't working in chrome; works perfectly in firefox.
             // peer.on('close', function () {
@@ -442,12 +427,50 @@ export function VtubchatView(props) {
             //     peer.destroy()
             // })
 
+            peer.on('connect',function () {
+                console.log("connected!");
+                console.log(peer);
+                peer.send("okk");
+                const videoElement = document.querySelector(".input_video");
+                //the function main can pass modelURL latter
+                const app = new PIXI.Application({
+                    view: document.getElementById("live2d"),
+                    autoStart: true,
+                    backgroundAlpha: 0,
+                    backgroundColor: 0xffffff,
+                    resizeTo: window,
+                });
 
-            // peer.on('data', function (data) {
-            //     //receive the points sended counterpart
-            //     console.log("receive data");
-            //     console.log(data);
-            // })
+                try{
+                    console.log(this);
+                    this.on("data", data => {
+                        // got a data channel message
+                        console.log('got a message from peer1: ' + data)
+                    });
+                    console.log("successful")
+                }catch (error){
+                    console.log("print error")
+                    console.log(error);
+                }
+
+                main(videoElement,app);
+            })
+
+            peer.on('error', err => console.log('error', err))
+
+            console.log("debug1")
+
+            try{
+                peer.on("data", data => {
+                    // got a data channel message
+                    console.log('got a message from peer1: ' + data)
+                })
+            }catch (error){
+                console.log("print error")
+                console.log(error);
+            }
+
+            console.log("debug2")
 
             /* the next code cause some bug in the React Frame,so comment them
 
@@ -531,21 +554,6 @@ export function VtubchatView(props) {
     }
 
     const Response = () => {
-        const videoElement = document.querySelector(".input_video");
-        // guideCanvas = document.querySelector("canvas.guides");
-
-        console.log(videoElement);
-        //the function main can pass modelURL latter
-        const app = new PIXI.Application({
-            view: document.getElementById("live2d"),
-            autoStart: true,
-            backgroundAlpha: 0,
-            backgroundColor: 0xffffff,
-            resizeTo: window,
-        });
-
-        main(videoElement,app);
-
         var startButton = document.getElementById('startButton');
         var hangupButton = document.getElementById('hangupButton');
 
@@ -555,7 +563,7 @@ export function VtubchatView(props) {
 
         //used to initialize a peer
         function InitPeer(type) {
-            let peer = new Peer({ initiator: (type == 'init') ? true : false , trickle: false})
+            let peer = new Peer({ initiator: (type == 'init') ? true : false , trickle: false,objectMode: true})
             console.log("type " + type);
             //This isn't working in chrome; works perfectly in firefox.
             // peer.on('close', function () {
@@ -563,12 +571,49 @@ export function VtubchatView(props) {
             //     peer.destroy()
             // })
 
+            peer.on('connect',function () {
+                console.log("connected!");
+                const videoElement = document.querySelector(".input_video");
+                //the function main can pass modelURL latter
+                const app = new PIXI.Application({
+                    view: document.getElementById("live2d"),
+                    autoStart: true,
+                    backgroundAlpha: 0,
+                    backgroundColor: 0xffffff,
+                    resizeTo: window,
+                });
 
-            // peer.on('data', function (data) {
-            //     //receive the points sended counterpart
-            //     console.log("receive data");
-            //     console.log(data);
-            // })
+                try{
+                    console.log(this);
+                    this.on("data", data => {
+                        // got a data channel message
+                        console.log('got a message from peer1: ' + data)
+                    })
+                    console.log("successful")
+                }catch (error){
+                    console.log("print error")
+                    console.log(error);
+                }
+
+                main(videoElement,app);
+
+            })
+
+            peer.on('error', err => console.log('error', err))
+
+            console.log("debug1")
+
+            try{
+                peer.on("data", data => {
+                    // got a data channel message
+                    console.log('got a message from peer1: ' + data)
+                })
+            }catch (error){
+                console.log("print error")
+                console.log(error);
+            }
+
+            console.log("debug2")
 
             /* the next code cause some bug in the React Frame,so comment them
 
