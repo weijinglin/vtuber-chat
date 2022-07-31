@@ -195,7 +195,6 @@ export function VtubchatView(props) {
         socket.on("back_ans",data => {
             const answer = JSON.parse(data.answer);
             client.current.p2p.setRemoteDescription(answer);
-            dc.current.send("test string");
         })
     }
 
@@ -216,14 +215,15 @@ export function VtubchatView(props) {
 
         main(videoElement,app);
         // setExeTime(1);
-
-
-
     },[]);
 
 
 
     const onResult = (results) => {
+
+        if(dc.current){
+            dc.current.send(results);
+        }
 
         animateLive2DModel(results.multiFaceLandmarks[0]);
         animateRemoteModel(results.multiFaceLandmarks[0]);
