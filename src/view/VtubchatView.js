@@ -34,6 +34,7 @@ export function VtubchatView(props) {
 
     const [isHangup,setIsHangup] = useState(false);
 
+    var localStream;
 
     const videoElement = document.querySelector(".input_video");
     // var guideCanvas = document.querySelector("canvas.guides");
@@ -58,34 +59,6 @@ export function VtubchatView(props) {
     const client = useRef({});
 
     const dc = useRef();
-
-    async function LoadRemote(modelUrl){
-        // load live2d model
-        // currentModel = await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json", { autoInteract: false });
-        // currentModel = await Live2DModel.from("shizuku.model.json", { autoInteract: false });
-        remoteModel = await Live2DModel.from(modelUrl, { autoInteract: false });
-        remoteModel.scale.set(0.2);
-        remoteModel.interactive = true;
-        remoteModel.anchor.set(0.5, 0.8);
-        // remoteModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
-
-        remoteModel.position.set(window.innerWidth * 0.75, window.innerHeight * 1);
-
-        // Add events to drag model
-        remoteModel.on("pointerdown", (e) => {
-            remoteModel.offsetX = e.data.global.x - remoteModel.position.x;
-            remoteModel.offsetY = e.data.global.y - remoteModel.position.y;
-            remoteModel.dragging = true;
-        });
-        remoteModel.on("pointerup", (e) => {
-            remoteModel.dragging = false;
-        });
-        remoteModel.on("pointermove", (e) => {
-            if (remoteModel.dragging) {
-                remoteModel.position.set(e.data.global.x - remoteModel.offsetX, e.data.global.y - remoteModel.offsetY);
-            }
-        });
-    }
 
     async function LoadModel(modelUrl){
         // load live2d model
@@ -122,7 +95,6 @@ export function VtubchatView(props) {
         // startCamera();
         await LoadModel(modelUrl);
         await LoadModel(modelUrl);
-        await LoadRemote(modelUrl);
 
         // Add mousewheel events to scale model
         // document.querySelector("#live2d").addEventListener("wheel", (e) => {
@@ -132,7 +104,6 @@ export function VtubchatView(props) {
 
         // add live2d model to stage
         app.stage.addChild(currentModel);
-        app.stage.addChild(remoteModel);
 
         if(!facemesh){
             // create media pipe facemesh instance
@@ -163,66 +134,32 @@ export function VtubchatView(props) {
         startCamera(videoElement);
     }
 
-    const socketInit = () => {
-        socket.on("try_con",data => {
-            console.log("debug");
-            console.log(data.offer);
-            const offer = JSON.parse(data.offer);
-            client.current.p2p = new RTCPeerConnection({
-                iceServers: [
-                    { urls: "stun:stun.l.google.com:19302"}, // 谷歌的公共服务
-                ]
-            })
+    useEffect( ()=>{
+            const videoElement = document.querySelector(".input_video");
+            // guideCanvas = document.querySelector("canvas.guides");
 
-            client.current.p2p.onicecandidate = e => {
-                console.log("New ice candidate, reprinting SDP : " + JSON.stringify(client.current.p2p.localDescription));
-                const data = JSON.stringify(client.current.p2p.localDescription);
-                socket.emit("answer",{answer: data})
-            }
+            console.log(videoElement);
 
-            client.current.p2p.ondatachannel = e => {
-                dc.current = e.channel;
-                dc.current.onmessage = e => console.log("got message from client : " + e.data);
-                dc.current.onopen = e => console.log("Connection open ! ! !");
-            }
+            const app = new PIXI.Application({
+                view: document.getElementById("live2d"),
+                autoStart: true,
+                backgroundAlpha: 0,
+                backgroundColor: 0xffffff,
+                resizeTo: window/2,
+            });
 
-            client.current.p2p.setRemoteDescription(offer).then(e => console.log("offer set done"));
-
-            client.current.p2p.createAnswer().then(a => client.current.p2p.setLocalDescription(a)).then(a => console.log("answer created"));
-        })
-
-
-        socket.on("back_ans",data => {
-            const answer = JSON.parse(data.answer);
-            client.current.p2p.setRemoteDescription(answer);
-        })
-    }
-
-    useEffect(()=>{
-        socketInit();
-        const videoElement = document.querySelector(".input_video");
-        // guideCanvas = document.querySelector("canvas.guides");
-
-        console.log(videoElement);
-
-        const app = new PIXI.Application({
-            view: document.getElementById("live2d"),
-            autoStart: true,
-            backgroundAlpha: 0,
-            backgroundColor: 0xffffff,
-            resizeTo: window,
-        });
-
-        main(videoElement,app);
+            main(videoElement,app);
         // setExeTime(1);
     },[]);
 
 
 
     const onResult = (results) => {
-
+        console.log("test")
+        console.log("onresult");
+        console.log(dc.current);
         if(dc.current){
-            dc.current.send(results);
+            dc.current.send(JSON.stringify(results));
         }
 
         animateLive2DModel(results.multiFaceLandmarks[0]);
@@ -431,25 +368,100 @@ export function VtubchatView(props) {
 
     //连接的发起方进行的操作
     const startAction = () => {
-        client.current.p2p = new RTCPeerConnection({
-            iceServers: [
-                { urls: "stun:stun.l.google.com:19302"}, // 谷歌的公共服务
-            ]
-        });
+        //采集摄像头视频
+        const remoteVideo = document.getElementById('remote_video');
 
-        dc.current = client.current.p2p.createDataChannel("channel")
+                socket.emit("NewClient");
+                localStream = document.getElementById("live2d").captureStream();
+                console.log("debug");
+                console.log(localStream);
 
-        dc.current.onmessage = e => console.log("got message : " + e.data)
+                //used to initialize a peer
+                function InitPeer(type) {
+                    let peer = new Peer({ initiator: (type == 'init') ? true : false, stream: localStream, trickle: false})
+                    console.log("type " + type);
+                    peer.on('stream', function (stream) {
+                        // CreateVideo(stream)
+                        remoteVideo.srcObject = stream;
+                        remoteVideo.play();
+                        remoteVideo.addEventListener("click",() => {
+                            if (remoteVideo.volume != 0)
+                                remoteVideo.volume = 0
+                            else
+                                remoteVideo.volume = 1
+                        })
+                    })
+                    //This isn't working in chrome; works perfectly in firefox.
+                    // peer.on('close', function () {
+                    //     document.getElementById("peerVideo").remove();
+                    //     peer.destroy()
+                    // })
 
-        dc.current.onopen = e => console.log("connection open!!!");
+                    /* the next code cause some bug in the React Frame,so comment them
 
-        client.current.p2p.onicecandidate = e => {
-            console.log("New ice candidate, reprinting SDP : " + JSON.stringify(client.current.p2p.localDescription));
-            const data = JSON.stringify(client.current.p2p.localDescription);
-            socket.emit("con_req",{ offer: data});
-        }
+                    // peer.on('data', function (data) {
+                    //     let decodedData = new TextDecoder('utf-8').decode(data)
+                    //     let peervideo = document.querySelector('#remote_video')
+                    //     peervideo.style.filter = decodedData
+                    // })
+                    console.log("debug")
 
-        client.current.p2p.createOffer().then(o => client.current.p2p.setLocalDescription(o)).then(a => console.log("set successful"));
+                    */
+
+                    return peer
+                }
+
+                //for peer of type init
+                function MakePeer() {
+                    console.log("make peer");
+                    client.current.gotAnswer = false
+                    let peer = InitPeer('init')
+                    console.log("signal")
+                    peer.on('signal', function (data) {
+                        console.log("signal boom");
+                        if (!client.current.gotAnswer) {
+                            socket.emit('Offer', data);
+                        }
+                    })
+                    client.current.peer = peer
+                }
+
+                //for peer of type not init
+                function FrontAnswer(offer) {
+                    let peer = InitPeer('notInit')
+                    peer.on('signal', (data) => {
+                        socket.emit('Answer', data)
+                    })
+                    peer.signal(offer)
+                    client.current.peer = peer
+                }
+
+                function SignalAnswer(answer) {
+                    client.current.gotAnswer = true
+                    let peer = client.current.peer
+                    peer.signal(answer)
+                }
+
+                function SessionActive() {
+                    document.write('Session Active. Please come back later')
+                }
+
+                function RemovePeer() {
+                    if (client.current.peer) {
+                        client.current.peer.destroy();
+                    }
+                }
+
+                function Hangup() {
+                    setIsHangup(true);
+                }
+
+                socket.on('BackOffer', FrontAnswer)
+                socket.on('BackAnswer', SignalAnswer)
+                socket.on('SessionActive', SessionActive)
+                socket.on('CreatePeer', MakePeer)
+                socket.on('Disconnect', RemovePeer)
+                socket.on('hangup',Hangup);
     }
 
 
@@ -460,6 +472,7 @@ export function VtubchatView(props) {
                 <video className="input_video" width="1280px" height="720px" ></video>
             </div>
             <canvas id="live2d"></canvas>
+            <video id="remote_video" autoPlay></video>
             <hr/>
             <div className="button_container">
                 <button id="startButton" onClick={startAction}>呼叫</button>
