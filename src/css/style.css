@@ -46,10 +46,10 @@ video {
     max-width: 400px;
     height: auto;
     transform: scale(-1, 1);
-    /*display: none;*/
+    display: none;
 }
-video.remote_video {
-
+video#remote_video {
+    display: block;
 }
 .preview canvas {
     transform: scale(-1, 1);
