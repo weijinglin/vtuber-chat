@@ -155,13 +155,6 @@ export function VtubchatView(props) {
 
 
     const onResult = (results) => {
-        console.log("test")
-        console.log("onresult");
-        console.log(dc.current);
-        if(dc.current){
-            dc.current.send(JSON.stringify(results));
-        }
-
         animateLive2DModel(results.multiFaceLandmarks[0]);
         animateRemoteModel(results.multiFaceLandmarks[0]);
     };
@@ -464,6 +457,130 @@ export function VtubchatView(props) {
                 socket.on('hangup',Hangup);
     }
 
+    //连接的发起方进行的操作
+    const Response = () => {
+        //采集摄像头视频
+        const remoteVideo = document.getElementById('remote_video');
+
+        socket.emit("called");
+        localStream = document.getElementById("live2d").captureStream();
+        console.log("debug");
+        console.log(localStream);
+
+        //used to initialize a peer
+        function InitPeer(type) {
+            let peer = new Peer({ initiator: (type == 'init') ? true : false, stream: localStream, trickle: false})
+            console.log("type " + type);
+            peer.on('stream', function (stream) {
+                // CreateVideo(stream)
+                remoteVideo.srcObject = stream;
+                remoteVideo.play();
+                remoteVideo.addEventListener("click",() => {
+                    if (remoteVideo.volume != 0)
+                        remoteVideo.volume = 0
+                    else
+                        remoteVideo.volume = 1
+                })
+            })
+            //This isn't working in chrome; works perfectly in firefox.
+            // peer.on('close', function () {
+            //     document.getElementById("peerVideo").remove();
+            //     peer.destroy()
+            // })
+
+            /* the next code cause some bug in the React Frame,so comment them
+
+            // peer.on('data', function (data) {
+            //     let decodedData = new TextDecoder('utf-8').decode(data)
+            //     let peervideo = document.querySelector('#remote_video')
+            //     peervideo.style.filter = decodedData
+            // })
+            console.log("debug")
+
+            */
+
+            return peer
+        }
+
+        //for peer of type init
+        function MakePeer() {
+            console.log("make peer");
+            client.current.gotAnswer = false
+            let peer = InitPeer('init')
+            console.log("signal")
+            peer.on('signal', function (data) {
+                console.log("signal boom");
+                if (!client.current.gotAnswer) {
+                    socket.emit('Offer', data);
+                }
+            })
+            client.current.peer = peer
+        }
+
+        //for peer of type not init
+        function FrontAnswer(offer) {
+            let peer = InitPeer('notInit')
+            peer.on('signal', (data) => {
+                socket.emit('Answer', data)
+            })
+            peer.signal(offer)
+            client.current.peer = peer
+        }
+
+        function SignalAnswer(answer) {
+            client.current.gotAnswer = true
+            let peer = client.current.peer
+            peer.signal(answer)
+        }
+
+        function SessionActive() {
+            document.write('Session Active. Please come back later')
+        }
+
+        function RemovePeer() {
+            if (client.current.peer) {
+                client.current.peer.destroy();
+            }
+        }
+
+        function Hangup() {
+            setIsHangup(true);
+        }
+
+        socket.on('BackOffer', FrontAnswer)
+        socket.on('BackAnswer', SignalAnswer)
+        socket.on('SessionActive', SessionActive)
+        socket.on('CreatePeer', MakePeer)
+        socket.on('Disconnect', RemovePeer)
+        socket.on('hangup',Hangup);
+    }
+
+
+    function response() {
+        console.log("response");
+        console.log(isModalVisible);
+        setIsModalVisible(true);
+    }
+
+    const onOk = () => {
+        console.log("ok hit");
+        setIsModalVisible(false);
+        Response();
+        console.log("debug2");
+        console.log(localStream);
+    }
+
+    const onCancel = () => {
+        socket.emit("failed");
+        setIsModalVisible(false);
+    }
+
+    const fail= () => {
+        setIsReject(true);
+    }
+
+    socket.on("call",response);
+    socket.on("failed",fail);
 
 
     return (
@@ -478,7 +595,7 @@ export function VtubchatView(props) {
                 <button id="startButton" onClick={startAction}>呼叫</button>
                 <button id="hangupButton" onClick={null}>关闭</button>
             </div>
-            <Dialog show={isModalVisible} onok={null} oncancel={null}></Dialog>
+            <Dialog show={isModalVisible} onok={onOk} oncancel={onCancel}></Dialog>
             <RejectDialog show={isReject} onok={()=>{
                 setIsReject(false);
             }}></RejectDialog>
