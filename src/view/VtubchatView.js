@@ -579,6 +579,24 @@ export function VtubchatView(props) {
         setIsReject(true);
     }
 
+
+    const hangupAction = () => {
+        console.log(localStream);
+        if(localStream == null){
+            // localStream = localVideo.srcObject;
+            localStream = document.getElementById("live2d").captureStream();
+        }
+        localStream.getTracks().forEach(track => track.stop());
+        console.log("in hangup");
+        console.log("check peer");
+        console.log(client.current.peer);
+        if(client.current.peer){
+            console.log("peer okk")
+            client.current.peer.destroy();
+            socket.emit("hangup");
+        }
+    }
+
     socket.on("call",response);
     socket.on("failed",fail);
 
@@ -601,6 +619,10 @@ export function VtubchatView(props) {
             }}></RejectDialog>
             <HangupDialog show={isHangup} onok={()=>{
                 //need to add the logic of hangup
+                if(client.current.peer){
+                    console.log("peer okk")
+                    client.current.peer.destroy();
+                }
                 setIsHangup(false);
             }}></HangupDialog>
         </div>
