@@ -611,7 +611,7 @@ export function VtubchatView(props) {
             <hr/>
             <div className="button_container">
                 <button id="startButton" onClick={startAction}>呼叫</button>
-                <button id="hangupButton" onClick={null}>关闭</button>
+                <button id="hangupButton" onClick={hangupAction}>关闭</button>
             </div>
             <Dialog show={isModalVisible} onok={onOk} oncancel={onCancel}></Dialog>
             <RejectDialog show={isReject} onok={()=>{
@@ -619,6 +619,10 @@ export function VtubchatView(props) {
             }}></RejectDialog>
             <HangupDialog show={isHangup} onok={()=>{
                 //need to add the logic of hangup
+                if(localStream == null){
+                    localStream = document.getElementById("live2d").captureStream();
+                }
+                localStream.getTracks().forEach(track => track.stop());
                 if(client.current.peer){
                     console.log("peer okk")
                     client.current.peer.destroy();
