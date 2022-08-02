@@ -127,3 +127,7 @@ a.current {
     }
 }
 
+#live2d{
+    height: 300px;
+    float: left;
+}
