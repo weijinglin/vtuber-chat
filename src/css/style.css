@@ -131,3 +131,8 @@ a.current {
     height: 300px;
     float: left;
 }
+
+.choice{
+    height: 50px;
+    width: 200px;
+}

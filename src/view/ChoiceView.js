@@ -1,15 +1,20 @@
 import {Link} from "react-router-dom";
+import {Button} from "antd";
 
 export function ChoiceView(props) {
 
     return(
         <div>
-            <Link to='/simple'>
-
-            </Link>
-            <Link to='/vtuber'>
-
-            </Link>
+            <div>
+                <Button className="choice">
+                    simple-chat
+                </Button>
+            </div>
+            <div>
+                <Button className="choice">
+                    vtub-chat
+                </Button>
+            </div>
         </div>
     )
 }
