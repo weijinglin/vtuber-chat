@@ -51,6 +51,9 @@ video {
 video#remote_video {
     display: block;
 }
+video#local_video{
+    display: block;
+}
 .preview canvas {
     transform: scale(-1, 1);
 }
@@ -135,4 +138,10 @@ a.current {
 .choice{
     height: 50px;
     width: 200px;
+    margin: auto;
+}
+
+.buttondiv{
+    margin-top: 200px;
+    text-align:center;
 }
