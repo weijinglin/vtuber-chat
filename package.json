@@ -17,6 +17,7 @@
     "pixi.js": "^6.5.1",
     "react": "^18.2.0",
     "react-dom": "^18.2.0",
+    "react-router-dom": "^6.3.0",
     "react-scripts": "5.0.1",
     "simple-peer": "^9.1.1",
     "socket.io": "^4.5.1",
