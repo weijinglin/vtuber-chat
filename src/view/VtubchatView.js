@@ -49,7 +49,11 @@ export function VtubchatView(props) {
     } = Kalidokit;
 
     // Url to Live2D
-    const modelUrl = "./models/hiyori/hiyori_pro_t10.model3.json";
+    // const modelUrl = "./models/hiyori/hiyori_pro_t10.model3.json";
+    // const modelUrl = "./models/haru_greeter_pro_jp/runtime/haru_greeter_t03.model3.json";
+    const modelUrl = "./models/mao_pro_zh/runtime/mao_pro_t02.model3.json";
+    // const modelUrl = "./models/haru_greeter_pro_jp/runtime/haru_greeter_t03.model3.json";
+
 
     var currentModel, facemesh;
 
@@ -145,7 +149,7 @@ export function VtubchatView(props) {
                 autoStart: true,
                 backgroundAlpha: 0,
                 backgroundColor: 0xffffff,
-                resizeTo: window/2,
+                resizeTo: window/1.5,
             });
 
             main(videoElement,app);
