@@ -72,7 +72,7 @@ export function VtubchatView(props) {
         currentModel.anchor.set(0.5, 0.8);
         // currentModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
 
-        currentModel.position.set(window.innerWidth * 0.5, window.innerHeight * 1.25);
+        currentModel.position.set(window.innerWidth * 0.2, window.innerHeight * 1);
 
         // Add events to drag model
         currentModel.on("pointerdown", (e) => {
@@ -96,7 +96,7 @@ export function VtubchatView(props) {
         // guideCanvas = document.querySelector("canvas.guides");
         // startCamera();
         await LoadModel(modelUrl);
-        await LoadModel(modelUrl);
+        // await LoadModel(modelUrl);
 
         // Add mousewheel events to scale model
         // document.querySelector("#live2d").addEventListener("wheel", (e) => {
