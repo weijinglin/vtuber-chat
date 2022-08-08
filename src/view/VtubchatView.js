@@ -136,23 +136,23 @@ export function VtubchatView(props) {
         startCamera(videoElement);
     }
 
-    useEffect( ()=>{
-            const videoElement = document.querySelector(".input_video");
-            // guideCanvas = document.querySelector("canvas.guides");
-
-            console.log(videoElement);
-
-            const app = new PIXI.Application({
-                view: document.getElementById("live2d"),
-                autoStart: true,
-                backgroundAlpha: 0,
-                backgroundColor: 0xffffff,
-                resizeTo: window,
-            });
-
-            main(videoElement,app);
-        // setExeTime(1);
-    },[]);
+    // useEffect( ()=>{
+    //         const videoElement = document.querySelector(".input_video");
+    //         // guideCanvas = document.querySelector("canvas.guides");
+    //
+    //         console.log(videoElement);
+    //
+    //         const app = new PIXI.Application({
+    //             view: document.getElementById("live2d"),
+    //             autoStart: true,
+    //             backgroundAlpha: 0,
+    //             backgroundColor: 0xffffff,
+    //             resizeTo: window,
+    //         });
+    //
+    //         main(videoElement,app);
+    //     // setExeTime(1);
+    // },[]);
 
 
 
@@ -363,6 +363,22 @@ export function VtubchatView(props) {
 
     //连接的发起方进行的操作
     const startAction = () => {
+
+        const videoElement = document.querySelector(".input_video");
+        // guideCanvas = document.querySelector("canvas.guides");
+
+        console.log(videoElement);
+
+        const app = new PIXI.Application({
+            view: document.getElementById("live2d"),
+            autoStart: true,
+            backgroundAlpha: 0,
+            backgroundColor: 0xffffff,
+            resizeTo: window,
+        });
+
+        main(videoElement,app);
+
         //采集摄像头视频
         const remoteVideo = document.getElementById('remote_video');
 
@@ -460,7 +476,23 @@ export function VtubchatView(props) {
     }
 
     //连接的发起方进行的操作
-    const Response = () => {
+    async function Response(){
+
+        const videoElement = document.querySelector(".input_video");
+        // guideCanvas = document.querySelector("canvas.guides");
+
+        console.log(videoElement);
+
+        const app = new PIXI.Application({
+            view: document.getElementById("live2d"),
+            autoStart: true,
+            backgroundAlpha: 0,
+            backgroundColor: 0xffffff,
+            resizeTo: window,
+        });
+
+        await main(videoElement,app);
+
         //采集摄像头视频
         const remoteVideo = document.getElementById('remote_video');
 
