@@ -13,6 +13,7 @@ import Peer from 'simple-peer'
 import Dialog from "../components/Dialog";
 import RejectDialog from "../components/RejectDialog";
 import HangupDialog from "../components/HangupDialog";
+import {ChoiceDialog} from "../components/ChoiceDialog";
 
 // with a global PIXI variable, this plugin can automatically take
 // the needed functionality from it, such as window.PIXI.Ticker
@@ -663,6 +664,7 @@ export function VtubchatView(props) {
                 }
                 setIsHangup(false);
             }}></HangupDialog>
+            <ChoiceDialog show={true} onok={onOk} oncancel={onCancel}></ChoiceDialog>
         </div>
     );
 }
