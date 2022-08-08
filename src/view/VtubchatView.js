@@ -49,9 +49,9 @@ export function VtubchatView(props) {
     } = Kalidokit;
 
     // Url to Live2D
-    // const modelUrl = "./models/hiyori/hiyori_pro_t10.model3.json";
+    const modelUrl = "./models/hiyori/hiyori_pro_t10.model3.json";
     // const modelUrl = "./models/haru_greeter_pro_jp/runtime/haru_greeter_t03.model3.json";
-    const modelUrl = "./models/mao_pro_zh/runtime/mao_pro_t02.model3.json";
+    // const modelUrl = "./models/mao_pro_zh/runtime/mao_pro_t02.model3.json";
     // const modelUrl = "./models/haru_greeter_pro_jp/runtime/haru_greeter_t03.model3.json";
 
 
@@ -61,8 +61,6 @@ export function VtubchatView(props) {
 
     // stand for peer connection
     const client = useRef({});
-
-    const dc = useRef();
 
     async function LoadModel(modelUrl){
         // load live2d model
@@ -74,7 +72,7 @@ export function VtubchatView(props) {
         currentModel.anchor.set(0.5, 0.8);
         // currentModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
 
-        currentModel.position.set(window.innerWidth * 0.25, window.innerHeight * 1);
+        currentModel.position.set(window.innerWidth * 0.5, window.innerHeight * 1.25);
 
         // Add events to drag model
         currentModel.on("pointerdown", (e) => {
@@ -149,7 +147,7 @@ export function VtubchatView(props) {
                 autoStart: true,
                 backgroundAlpha: 0,
                 backgroundColor: 0xffffff,
-                resizeTo: window/1.5,
+                resizeTo: window,
             });
 
             main(videoElement,app);
