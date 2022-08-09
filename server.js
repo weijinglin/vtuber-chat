@@ -77,12 +77,12 @@ io.on('connection', function (socket) {
 
 function v_con(data) {
     console.log(data);
-    this.broadcast.emit("try_con",data);
+    this.to("room").emit("try_con",data);
 }
 
 function re_ans(data) {
     console.log(data);
-    this.broadcast.emit("back_ans",data);
+    this.to("room").emit("back_ans",data);
 }
 
 function Dohangup() {
