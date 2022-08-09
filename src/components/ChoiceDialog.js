@@ -1,5 +1,5 @@
 import 'antd/dist/antd.css';
-import {Modal, Select} from "antd";
+import {Avatar, Image, Modal, Select} from "antd";
 import React from 'react';
 
 const { Option } = Select;
@@ -25,7 +25,16 @@ export function ChoiceDialog(props) {
                     onChange={onChange}
                     filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
                 >
-                    <Option value="jack">Jack</Option>
+                    <Option value="jack"><Avatar
+                        src={
+                            <Image
+                                src="https://joeschmoe.io/api/v1/random"
+                                style={{
+                                    width: 32,
+                                }}
+                            />
+                        }
+                    /></Option>
                     <Option value="lucy">Lucy</Option>
                     <Option value="tom">Tom</Option>
                 </Select>

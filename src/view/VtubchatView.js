@@ -50,10 +50,15 @@ export function VtubchatView(props) {
     } = Kalidokit;
 
     // Url to Live2D
-    const modelUrl = "./models/hiyori/hiyori_pro_t10.model3.json";
+    // const modelUrl = "./models/hiyori/hiyori_pro_t10.model3.json";
     // const modelUrl = "./models/haru_greeter_pro_jp/runtime/haru_greeter_t03.model3.json";
     // const modelUrl = "./models/mao_pro_zh/runtime/mao_pro_t02.model3.json";
     // const modelUrl = "./models/haru_greeter_pro_jp/runtime/haru_greeter_t03.model3.json";
+    // const modelUrl = "./models/shizuku/sizuku/runtime/shizuku.model3.json";
+    const modelUrl = "./models/chitose/chitose/runtime/chitose.model3.json";
+    // const modelUrl = "./models/wanko/wanko/runtime/wanko_touch.model3.json"
+
+
 
 
     var currentModel, facemesh;
@@ -664,7 +669,7 @@ export function VtubchatView(props) {
                 }
                 setIsHangup(false);
             }}></HangupDialog>
-            <ChoiceDialog show={true} onok={onOk} oncancel={onCancel}></ChoiceDialog>
+            <ChoiceDialog show={false} onok={onOk} oncancel={onCancel}></ChoiceDialog>
         </div>
     );
 }
