@@ -46,10 +46,10 @@ io.on('connection', function (socket) {
         if(clients == 2){
             //向对端发起请求
             console.log("send req");
-            this.broadcast.emit("call");
+            this.to("room").emit("call");
         }
         else{
-            this.emit("failed")
+            this.to("room").emit("failed")
         }
     })
     if (clients < 2) {
@@ -87,33 +87,33 @@ function re_ans(data) {
 
 function Dohangup() {
     console.log("hangup");
-    this.broadcast.emit("hangup");
+    this.to("room").emit("hangup");
 }
 
 function Disconnect() {
     if (clients > 0) {
         if (clients <= 2)
-            this.broadcast.emit("Disconnect")
+            this.to("room").emit("Disconnect")
         clients--
     }
 }
 
 function Dofailed() {
-    this.broadcast.emit("failed");
+    this.to("room").emit("failed");
 }
 
 function Docall() {
     console.log("hit");
-    this.broadcast.emit("CreatePeer");
+    this.to("room").emit("CreatePeer");
 }
 
 function SendOffer(offer) {
     console.log("offer");
-    this.broadcast.emit("BackOffer", offer)
+    this.to("room").emit("BackOffer", offer)
 }
 
 function SendAnswer(data) {
-    this.broadcast.emit("BackAnswer", data)
+    this.to("room").emit("BackAnswer", data)
 }
 
 http.listen(port, () => console.log(`Active on ${port} port`))
