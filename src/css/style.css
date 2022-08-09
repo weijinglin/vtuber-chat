@@ -50,9 +50,11 @@ video {
 }
 video#remote_video {
     display: block;
+    height:300px;
 }
 video#local_video{
     display: block;
+    height:300px;
 }
 .preview canvas {
     transform: scale(-1, 1);

@@ -52,10 +52,11 @@ export function VtubchatView(props) {
     // Url to Live2D
     // const modelUrl = "./models/hiyori/hiyori_pro_t10.model3.json";
     // const modelUrl = "./models/haru_greeter_pro_jp/runtime/haru_greeter_t03.model3.json";
-    // const modelUrl = "./models/mao_pro_zh/runtime/mao_pro_t02.model3.json";
+    const modelUrl = "./models/mao_pro_zh/runtime/mao_pro_t02.model3.json";
+
     // const modelUrl = "./models/haru_greeter_pro_jp/runtime/haru_greeter_t03.model3.json";
     // const modelUrl = "./models/shizuku/sizuku/runtime/shizuku.model3.json";
-    const modelUrl = "./models/chitose/chitose/runtime/chitose.model3.json";
+    // const modelUrl = "./models/chitose/chitose/runtime/chitose.model3.json";
     // const modelUrl = "./models/wanko/wanko/runtime/wanko_touch.model3.json"
 
 
@@ -73,7 +74,8 @@ export function VtubchatView(props) {
         // currentModel = await Live2DModel.from("https://cdn.jsdelivr.net/gh/guansss/pixi-live2d-display/test/assets/haru/haru_greeter_t03.model3.json", { autoInteract: false });
         // currentModel = await Live2DModel.from("shizuku.model.json", { autoInteract: false });
         currentModel = await Live2DModel.from(modelUrl, { autoInteract: false });
-        currentModel.scale.set(0.2);
+        currentModel.scale.set(0.15);
+        // currentModel.y = -10000;
         currentModel.interactive = true;
         currentModel.anchor.set(0.5, 0.8);
         // currentModel.position.set(window.innerWidth * 0.5, window.innerHeight * 0.8);
@@ -124,6 +126,7 @@ export function VtubchatView(props) {
             try {
                 await facemesh.initialize();
             }catch (e){
+                console.log("Loading model failed")
                 // await facemesh.initialize();
             }
         }
@@ -164,7 +167,6 @@ export function VtubchatView(props) {
 
     const onResult = (results) => {
         animateLive2DModel(results.multiFaceLandmarks[0]);
-        animateRemoteModel(results.multiFaceLandmarks[0]);
     };
 
     const animateRemoteModel = (points) => {
