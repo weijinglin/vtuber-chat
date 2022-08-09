@@ -6,26 +6,21 @@ const { Option } = Select;
 
 export function ChoiceDialog(props) {
 
-    const onChange = (value) => {
-        console.log(`selected ${value}`);
-    };
-
-
     return (
         <>
             {/*<Button type="primary" onClick={showModal}>*/}
             {/*    Open Modal*/}
             {/*</Button>*/}
-            <Modal title="Accept a call" visible={props.show} onOk={props.onok} onCancel={props.oncancel}
-                   okText="receive" cancelText="reject">
+            <Modal title="choice your visual model" visible={props.show} onOk={props.onok} onCancel={props.oncancel}
+                   okText="ok" cancelText="cancel">
                 <Select
                     showSearch
                     placeholder="Select a person"
                     optionFilterProp="children"
-                    onChange={onChange}
+                    onChange={props.onchange}
                     filterOption={(input, option) => option.children.toLowerCase().includes(input.toLowerCase())}
                 >
-                    <Option value="jack"><Avatar
+                    <Option value="first"><Avatar
                         src={
                             <Image
                                 src={require("../assets/sun.png")}
@@ -35,7 +30,7 @@ export function ChoiceDialog(props) {
                             />
                         }
                     /></Option>
-                    <Option value="lucy"><Avatar
+                    <Option value="second"><Avatar
                         src={
                             <Image
                                 src={require("../assets/girl.png")}
@@ -45,7 +40,7 @@ export function ChoiceDialog(props) {
                             />
                         }
                     /></Option>
-                    <Option value="tom"><Avatar
+                    <Option value="third"><Avatar
                         src={
                             <Image
                                 src={require("../assets/magic.png")}

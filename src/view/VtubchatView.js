@@ -14,6 +14,7 @@ import Dialog from "../components/Dialog";
 import RejectDialog from "../components/RejectDialog";
 import HangupDialog from "../components/HangupDialog";
 import {ChoiceDialog} from "../components/ChoiceDialog";
+import {datacache} from "../cache/Urlcache";
 
 // with a global PIXI variable, this plugin can automatically take
 // the needed functionality from it, such as window.PIXI.Ticker
@@ -35,6 +36,10 @@ export function VtubchatView(props) {
 
     const [isHangup,setIsHangup] = useState(false);
 
+    const [isChoice,setIsChoice] = useState(false);
+
+    const isCaller = useRef();
+
     var localStream;
 
     const videoElement = document.querySelector(".input_video");
@@ -52,7 +57,7 @@ export function VtubchatView(props) {
     // Url to Live2D
     // const modelUrl = "./models/hiyori/hiyori_pro_t10.model3.json";
     // const modelUrl = "./models/haru_greeter_pro_jp/runtime/haru_greeter_t03.model3.json";
-    const modelUrl = "./models/mao_pro_zh/runtime/mao_pro_t02.model3.json";
+    const modelUrl = useRef();
 
     // const modelUrl = "./models/haru_greeter_pro_jp/runtime/haru_greeter_t03.model3.json";
     // const modelUrl = "./models/shizuku/sizuku/runtime/shizuku.model3.json";
@@ -103,7 +108,7 @@ export function VtubchatView(props) {
 
         // guideCanvas = document.querySelector("canvas.guides");
         // startCamera();
-        await LoadModel(modelUrl);
+        await LoadModel(modelUrl.current);
         // await LoadModel(modelUrl);
 
         // Add mousewheel events to scale model
@@ -607,9 +612,7 @@ export function VtubchatView(props) {
     const onOk = () => {
         console.log("ok hit");
         setIsModalVisible(false);
-        Response();
-        console.log("debug2");
-        console.log(localStream);
+        setIsChoice(true);
     }
 
     const onCancel = () => {
@@ -642,6 +645,11 @@ export function VtubchatView(props) {
     socket.on("call",response);
     socket.on("failed",fail);
 
+    const startButton = ()=>{
+        isCaller.current = true;
+        setIsChoice(true);
+    }
+
 
     return (
         <div id="body">
@@ -652,7 +660,7 @@ export function VtubchatView(props) {
             <video id="remote_video" autoPlay></video>
             <hr/>
             <div className="button_container">
-                <button id="startButton" onClick={startAction}>呼叫</button>
+                <button id="startButton" onClick={startButton}>呼叫</button>
                 <button id="hangupButton" onClick={hangupAction}>关闭</button>
             </div>
             <Dialog show={isModalVisible} onok={onOk} oncancel={onCancel}></Dialog>
@@ -671,7 +679,29 @@ export function VtubchatView(props) {
                 }
                 setIsHangup(false);
             }}></HangupDialog>
-            <ChoiceDialog show={true} onok={onOk} oncancel={onCancel}></ChoiceDialog>
+            <ChoiceDialog show={isChoice} onok={()=>{
+                setIsChoice(false);
+                if(isCaller.current){
+                    startAction();
+                }
+                else{
+                    Response();
+                }
+            }} oncancel={()=>{
+                setIsChoice(false);
+            }} onchange={(value)=>{
+                console.log(`selected ${value}`);
+                console.log(value);
+                if(value == 'first'){
+                    modelUrl.current = datacache[0];
+                }
+                else if(value == "second"){
+                    modelUrl.current = datacache[1];
+                }
+                else if(value == "third"){
+                    modelUrl.current = datacache[2];
+                }
+            }}></ChoiceDialog>
         </div>
     );
 }
