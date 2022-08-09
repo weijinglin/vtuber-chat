@@ -28,15 +28,33 @@ export function ChoiceDialog(props) {
                     <Option value="jack"><Avatar
                         src={
                             <Image
-                                src="https://joeschmoe.io/api/v1/random"
+                                src={require("../assets/sun.png")}
                                 style={{
                                     width: 32,
                                 }}
                             />
                         }
                     /></Option>
-                    <Option value="lucy">Lucy</Option>
-                    <Option value="tom">Tom</Option>
+                    <Option value="lucy"><Avatar
+                        src={
+                            <Image
+                                src={require("../assets/girl.png")}
+                                style={{
+                                    width: 32,
+                                }}
+                            />
+                        }
+                    /></Option>
+                    <Option value="tom"><Avatar
+                        src={
+                            <Image
+                                src={require("../assets/magic.png")}
+                                style={{
+                                    width: 32,
+                                }}
+                            />
+                        }
+                    /></Option>
                 </Select>
             </Modal>
         </>

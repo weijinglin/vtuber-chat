@@ -671,7 +671,7 @@ export function VtubchatView(props) {
                 }
                 setIsHangup(false);
             }}></HangupDialog>
-            <ChoiceDialog show={false} onok={onOk} oncancel={onCancel}></ChoiceDialog>
+            <ChoiceDialog show={true} onok={onOk} oncancel={onCancel}></ChoiceDialog>
         </div>
     );
 }
