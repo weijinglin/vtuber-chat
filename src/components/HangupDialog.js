@@ -4,20 +4,6 @@ import 'antd/dist/antd.css';
 
 
 const HangupDialog = (props) => {
-    // const [isModalVisible, setIsModalVisible] = useState(props.show);
-
-    // const showModal = () => {
-    //     setIsModalVisible(true);
-    // };
-
-    // const handleOk = () => {
-    //     setIsModalVisible(false);
-    // };
-    //
-    // const handleCancel = () => {
-    //     setIsModalVisible(false);
-    // };
-
     useEffect(()=>{
         console.log("debug");
         console.log(props.show);
