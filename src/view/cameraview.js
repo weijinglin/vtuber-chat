@@ -31,6 +31,7 @@ export function Cameraview(props) {
         hangupButton = document.getElementById('hangupButton');
         navigator.mediaDevices.getUserMedia({ video: true,audio:true })
             .then(function(mediaStream){
+                console.log("video");
                 socket.emit("NewClient");
                 localStream = mediaStream;
                 localVideo.srcObject = mediaStream;
@@ -150,6 +151,7 @@ export function Cameraview(props) {
         hangupButton = document.getElementById('hangupButton');
         navigator.mediaDevices.getUserMedia({ video: true,audio:true })
             .then(function(mediaStream){
+                console.log("video");  
                 socket.emit("called");
                 localStream = mediaStream;
                 console.log("debug");
@@ -216,7 +218,7 @@ export function Cameraview(props) {
 
                 function RemovePeer() {
                     if (client.current.peer) {
-                        client.current.peer.destroy();
+                        client.current.peer.destroy(["test"]);
                         hangupButton.disabled = true;
                         startButton.disabled = false;
                     }
@@ -249,11 +251,20 @@ export function Cameraview(props) {
         console.log(client.current.peer);
         if(client.current.peer){
             console.log("peer okk")
+            try {
+                client.current.peer.destroy(["test"]);
+                console.log("destory");
+            }
+            catch (err){
+                console.log("error");
+                console.log(err);
+            }
             delete client.current.peer;
             client.current.peer = null;
             hangupButton.disabled = true;
             startButton.disabled = false;
             socket.emit("hangup");
+            console.log("all finish");
         }
     }
 
@@ -308,10 +319,19 @@ export function Cameraview(props) {
                 localStream.getTracks().forEach(track => track.stop());
                 if(client.current.peer){
                     console.log("peer okk")
+                    try {
+                        client.current.peer.destroy();
+                        console.log("destory");
+                    }
+                    catch (err){
+                        console.log("error");
+                        console.log(err);
+                    }
                     delete client.current.peer;
                     client.current.peer = null;
                     hangupButton.disabled = true;
                     startButton.disabled = false;
+                    console.log("all finish");
                 }
                 setIsHangup(false);
             }}></HangupDialog>
