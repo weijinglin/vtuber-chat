@@ -18,11 +18,6 @@ const RejectDialog = (props) => {
     //     setIsModalVisible(false);
     // };
 
-    useEffect(()=>{
-        console.log("debug");
-        console.log(props.show);
-    },[])
-
     return (
         <>
             {/*<Button type="primary" onClick={showModal}>*/}

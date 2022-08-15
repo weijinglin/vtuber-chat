@@ -4,10 +4,6 @@ import 'antd/dist/antd.css';
 
 
 const HangupDialog = (props) => {
-    useEffect(()=>{
-        console.log("debug");
-        console.log(props.show);
-    },[])
 
     return (
         <>

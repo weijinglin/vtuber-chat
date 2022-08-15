@@ -8,6 +8,8 @@ import {clear} from "@testing-library/user-event/dist/clear";
 
 export function Cameraview(props) {
 
+    console.log("begin");
+
     //control the visiability of Dialog
     const [isModalVisible, setIsModalVisible] = useState(false);
 
@@ -21,7 +23,7 @@ export function Cameraview(props) {
     var remoteVideo = document.getElementById('remote_video');
     var startButton = document.getElementById('startButton');
     var hangupButton = document.getElementById('hangupButton');
-    var localStream;
+    var localStream = null;
     // var client = {};
     const startAction = ()=>{
         //采集摄像头视频
@@ -45,14 +47,14 @@ export function Cameraview(props) {
                     console.log("type " + type);
                     peer.on('stream', function (stream) {
                         // CreateVideo(stream)
+                        console.log("in stream")
                         remoteVideo.srcObject = stream;
                         remoteVideo.play();
-                        remoteVideo.addEventListener("click",() => {
-                            if (remoteVideo.volume != 0)
-                                remoteVideo.volume = 0
-                            else
-                                remoteVideo.volume = 1
-                        })
+                        console.log("in stream finish")
+                    })
+
+                    peer.on('connect',function (){
+                        console.log("connection!!!");
                     })
                     //This isn't working in chrome; works perfectly in firefox.
                     // peer.on('close', function () {
@@ -87,6 +89,7 @@ export function Cameraview(props) {
                             if (!client.current.gotAnswer) {
                                 socket.emit('Offer', data);
                             }
+                            console.log("signal boom finish");
                         })
                         client.current.peer = peer
                     }
@@ -126,7 +129,7 @@ export function Cameraview(props) {
                         startButton.disabled = false;
                     }
                 }
-                
+
                 function Hangup() {
                     setIsHangup(true);
                 }
@@ -151,7 +154,7 @@ export function Cameraview(props) {
         hangupButton = document.getElementById('hangupButton');
         navigator.mediaDevices.getUserMedia({ video: true,audio:true })
             .then(function(mediaStream){
-                console.log("video");  
+                console.log("video");
                 socket.emit("called");
                 localStream = mediaStream;
                 console.log("debug");
@@ -175,6 +178,9 @@ export function Cameraview(props) {
                             else
                                 remoteVideo.volume = 1
                         })
+                    })
+                    peer.on('connect',function (){
+                        console.log("connection!!!");
                     })
                     return peer
                 }
@@ -245,14 +251,20 @@ export function Cameraview(props) {
         if(localStream == null){
             localStream = localVideo.srcObject;
         }
+        client.current.peer.removeStream(localStream);
+        client.current.peer.removeAllListeners('signal');
+        client.current.peer.removeAllListeners('stream');
         localStream.getTracks().forEach(track => track.stop());
+        remoteVideo.srcObject.getTracks().forEach(track=>track.stop());
+        delete localVideo.srcObject;
+        delete remoteVideo.srcObject;
         console.log("in hangup");
         console.log("check peer");
         console.log(client.current.peer);
         if(client.current.peer){
             console.log("peer okk")
             try {
-                client.current.peer.destroy(["test"]);
+                // client.current.peer.destroy(["test"]);
                 console.log("destory");
             }
             catch (err){
@@ -265,12 +277,19 @@ export function Cameraview(props) {
             startButton.disabled = false;
             socket.emit("hangup");
             console.log("all finish");
+            socket.off('BackOffer')
+            socket.off('BackAnswer')
+            socket.off('SessionActive')
+            socket.off('CreatePeer')
+            socket.off('Disconnect')
+            socket.off('hangup');
+            socket.off("call",response);
+            socket.off("failed",fail);
         }
     }
 
     function response() {
         console.log("response");
-        console.log(isModalVisible);
         setIsModalVisible(true);
     }
 
@@ -291,6 +310,7 @@ export function Cameraview(props) {
         setIsReject(true);
     }
 
+    // socket.on("call",response);
     socket.on("call",response);
     socket.on("failed",fail);
 
@@ -316,11 +336,17 @@ export function Cameraview(props) {
                 if(localStream == null){
                     localStream = localVideo.srcObject;
                 }
+                client.current.peer.removeStream(localStream);
+                client.current.peer.removeAllListeners('signal');
+                client.current.peer.removeAllListeners('stream');
                 localStream.getTracks().forEach(track => track.stop());
+                remoteVideo.srcObject.getTracks().forEach(track=>track.stop());
+                delete localVideo.srcObject;
+                delete remoteVideo.srcObject;
                 if(client.current.peer){
                     console.log("peer okk")
                     try {
-                        client.current.peer.destroy();
+                        // client.current.peer.destroy();
                         console.log("destory");
                     }
                     catch (err){
@@ -332,6 +358,14 @@ export function Cameraview(props) {
                     hangupButton.disabled = true;
                     startButton.disabled = false;
                     console.log("all finish");
+                    socket.off('BackOffer')
+                    socket.off('BackAnswer')
+                    socket.off('SessionActive')
+                    socket.off('CreatePeer')
+                    socket.off('Disconnect')
+                    socket.off('hangup');
+                    socket.off("call",response);
+                    socket.off("failed",fail);
                 }
                 setIsHangup(false);
             }}></HangupDialog>
