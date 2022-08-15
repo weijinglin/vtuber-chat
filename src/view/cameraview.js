@@ -38,7 +38,7 @@ export function Cameraview(props) {
                 localStream = mediaStream;
                 localVideo.srcObject = mediaStream;
                 localVideo.play();
-                startButton.disabled = true;
+                // startButton.disabled = true;
 
 
                 //used to initialize a peer
@@ -125,8 +125,6 @@ export function Cameraview(props) {
                 function RemovePeer() {
                     if (client.current.peer) {
                         client.current.peer.destroy();
-                        hangupButton.disabled = true;
-                        startButton.disabled = false;
                     }
                 }
 
@@ -161,7 +159,7 @@ export function Cameraview(props) {
                 console.log(localStream);
                 localVideo.srcObject = mediaStream;
                 localVideo.play();
-                startButton.disabled = true;
+                // startButton.disabled = true;
 
 
                 //used to initialize a peer
@@ -225,8 +223,8 @@ export function Cameraview(props) {
                 function RemovePeer() {
                     if (client.current.peer) {
                         client.current.peer.destroy(["test"]);
-                        hangupButton.disabled = true;
-                        startButton.disabled = false;
+                        // hangupButton.disabled = true;
+                        // startButton.disabled = false;
                     }
                 }
 
@@ -273,8 +271,8 @@ export function Cameraview(props) {
             }
             delete client.current.peer;
             client.current.peer = null;
-            hangupButton.disabled = true;
-            startButton.disabled = false;
+            // hangupButton.disabled = true;
+            // startButton.disabled = false;
             socket.emit("hangup");
             console.log("all finish");
             socket.off('BackOffer')
@@ -336,7 +334,12 @@ export function Cameraview(props) {
                 if(localStream == null){
                     localStream = localVideo.srcObject;
                 }
-                client.current.peer.removeStream(localStream);
+                try {
+                    client.current.peer.removeStream(localStream);
+                }
+                catch (e) {
+                    console.log(e)
+                }
                 client.current.peer.removeAllListeners('signal');
                 client.current.peer.removeAllListeners('stream');
                 localStream.getTracks().forEach(track => track.stop());
@@ -355,8 +358,8 @@ export function Cameraview(props) {
                     }
                     delete client.current.peer;
                     client.current.peer = null;
-                    hangupButton.disabled = true;
-                    startButton.disabled = false;
+                    // hangupButton.disabled = true;
+                    // startButton.disabled = false;
                     console.log("all finish");
                     socket.off('BackOffer')
                     socket.off('BackAnswer')
