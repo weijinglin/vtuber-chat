@@ -639,6 +639,14 @@ export function VtubchatView(props) {
             console.log("peer okk")
             client.current.peer.destroy();
             socket.emit("hangup");
+            socket.off('BackOffer')
+            socket.off('BackAnswer')
+            socket.off('SessionActive')
+            socket.off('CreatePeer')
+            socket.off('Disconnect')
+            socket.off('hangup');
+            socket.off("call",response);
+            socket.off("failed",fail);
         }
     }
 
@@ -676,6 +684,15 @@ export function VtubchatView(props) {
                 if(client.current.peer){
                     console.log("peer okk")
                     client.current.peer.destroy();
+                    socket.emit("hangup");
+                    socket.off('BackOffer')
+                    socket.off('BackAnswer')
+                    socket.off('SessionActive')
+                    socket.off('CreatePeer')
+                    socket.off('Disconnect')
+                    socket.off('hangup');
+                    socket.off("call",response);
+                    socket.off("failed",fail);
                 }
                 setIsHangup(false);
             }}></HangupDialog>
