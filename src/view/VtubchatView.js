@@ -632,6 +632,8 @@ export function VtubchatView(props) {
             localStream = document.getElementById("live2d").captureStream();
         }
         localStream.getTracks().forEach(track => track.stop());
+        document.getElementById('remote_video').srcObject.getTracks().forEach(track => track.stop());
+        document.querySelector(".input_video").srcObject.getTracks().forEach(track=>track.stop());
         console.log("in hangup");
         console.log("check peer");
         console.log(client.current.peer);
@@ -681,6 +683,8 @@ export function VtubchatView(props) {
                     localStream = document.getElementById("live2d").captureStream();
                 }
                 localStream.getTracks().forEach(track => track.stop());
+                document.getElementById('remote_video').srcObject.getTracks().forEach(track => track.stop());
+                document.querySelector(".input_video").srcObject.getTracks().forEach(track=>track.stop());
                 if(client.current.peer){
                     console.log("peer okk")
                     client.current.peer.destroy();
