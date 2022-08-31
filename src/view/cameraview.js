@@ -35,6 +35,8 @@ export function Cameraview(props) {
             .then(function(mediaStream){
                 console.log("video");
                 socket.emit("NewClient");
+                console.log("debug stream");
+                console.log(mediaStream);
                 localStream = mediaStream;
                 localVideo.srcObject = mediaStream;
                 localVideo.play();

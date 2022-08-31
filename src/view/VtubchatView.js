@@ -147,7 +147,9 @@ export function VtubchatView(props) {
         // pass facemesh callback function
         facemesh.onResults(onResult);
 
-        startCamera(videoElement);
+        console.log("try to start camera");
+
+        await startCamera(videoElement);
     }
 
     // useEffect( ()=>{
@@ -353,7 +355,29 @@ export function VtubchatView(props) {
 
 
     // start camera using mediapipe camera utils
-    const startCamera = (video) => {
+    // const startCamera = (video) => {
+    //     // sleep(1000);
+    //     const camera = new Camera(video, {
+    //         onFrame: async () => {
+    //             //console.log("fix");
+    //             //console.log(video);
+    //             await facemesh.send({ image: video });
+    //         },
+    //         width: 640,
+    //         height: 480,
+    //     });
+    //     if(camera.video === null){
+    //         // window.location.reload();
+    //         // setExeTime(0);
+    //         // sleep(1000);
+    //         console.log("wrong")
+    //         return;
+    //     }
+    //     camera.start();
+    //     // console.log("fix3");
+    // };
+
+    async  function startCamera(video){
         // sleep(1000);
         const camera = new Camera(video, {
             onFrame: async () => {
@@ -368,6 +392,7 @@ export function VtubchatView(props) {
             // window.location.reload();
             // setExeTime(0);
             // sleep(1000);
+            console.log("wrong")
             return;
         }
         camera.start();
@@ -375,9 +400,10 @@ export function VtubchatView(props) {
     };
 
     //连接的发起方进行的操作
-    const startAction = () => {
+     const startAction = () => {
 
         const videoElement = document.querySelector(".input_video");
+         console.log(videoElement);
         // guideCanvas = document.querySelector("canvas.guides");
 
         console.log(videoElement);
@@ -392,11 +418,22 @@ export function VtubchatView(props) {
 
         main(videoElement,app);
 
+         console.log("input debug")
+         console.log(document.querySelector("input_video"));
+
         //采集摄像头视频
         const remoteVideo = document.getElementById('remote_video');
 
                 socket.emit("NewClient");
+
                 localStream = document.getElementById("live2d").captureStream();
+
+                // the code try to add audio
+                var stream_video = videoElement.captureStream();
+                console.log("debug stream");
+                console.log(stream_video);
+                var audioTrack_media = stream_video .getAudioTracks()[0];
+                localStream.addTrack(audioTrack_media);
                 console.log("debug");
                 console.log(localStream);
 
@@ -511,6 +548,13 @@ export function VtubchatView(props) {
 
         socket.emit("called");
         localStream = document.getElementById("live2d").captureStream();
+
+        // the code try to add audio
+        var stream_video = document.querySelector("input_video").captureStream();
+        console.log("debug stream");
+        console.log(stream_video);
+        var audioTrack_media = stream_video .getAudioTracks()[0];
+        localStream.addTrack(audioTrack_media);
         console.log("debug");
         console.log(localStream);
 
