@@ -428,14 +428,28 @@ export function VtubchatView(props) {
 
                 localStream = document.getElementById("live2d").captureStream();
 
+                // 采集音频数据
+                var constrants = {
+                    video:false,
+                    audio:true
+                };
+                navigator.mediaDevices.getUserMedia(constrants).then(function (stream) {
+                    console.log(stream);
+                    var audioTrack_media = stream .getAudioTracks()[0];
+                    localStream.addTrack(audioTrack_media);
+                }).catch((e)=>{
+                    console.log("error");
+                    console.log(e);
+                });
+
                 // the code try to add audio
-                var stream_video = videoElement.captureStream();
-                console.log("debug stream");
-                console.log(stream_video);
-                var audioTrack_media = stream_video .getAudioTracks()[0];
-                localStream.addTrack(audioTrack_media);
-                console.log("debug");
-                console.log(localStream);
+                // var stream_video = videoElement.captureStream();
+                // console.log("debug stream");
+                // console.log(stream_video);
+                // var audioTrack_media = stream_video .getAudioTracks()[0];
+                // localStream.addTrack(audioTrack_media);
+                // console.log("debug");
+                // console.log(localStream);
 
                 //used to initialize a peer
                 function InitPeer(type) {
@@ -549,14 +563,28 @@ export function VtubchatView(props) {
         socket.emit("called");
         localStream = document.getElementById("live2d").captureStream();
 
+        // 采集音频数据
+        var constrants = {
+            video:false,
+            audio:true
+        };
+        navigator.mediaDevices.getUserMedia(constrants).then(function (stream) {
+            console.log(stream);
+            var audioTrack_media = stream .getAudioTracks()[0];
+            localStream.addTrack(audioTrack_media);
+        }).catch((e)=>{
+            console.log("error")
+            console.log(e);
+        });
+
         // the code try to add audio
-        var stream_video = document.querySelector("input_video").captureStream();
-        console.log("debug stream");
-        console.log(stream_video);
-        var audioTrack_media = stream_video .getAudioTracks()[0];
-        localStream.addTrack(audioTrack_media);
-        console.log("debug");
-        console.log(localStream);
+        // var stream_video = document.querySelector("input_video").captureStream();
+        // console.log("debug stream");
+        // console.log(stream_video);
+        // var audioTrack_media = stream_video .getAudioTracks()[0];
+        // localStream.addTrack(audioTrack_media);
+        // console.log("debug");
+        // console.log(localStream);
 
         //used to initialize a peer
         function InitPeer(type) {
