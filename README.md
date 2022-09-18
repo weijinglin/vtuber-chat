@@ -4,7 +4,7 @@ First, simple video chat. Second, video chat with vtuber image. You can choose y
 
 ## How to build this project
 
-1, cd src && node server.js
+1, node server.js
 
 That will build up a node server on [http://localhost:8080](http://localhost:8080)
 
